@@ -134,7 +134,7 @@ const ProjectDetail = ({onBack, user }) => {
     const handleSubmit = async () => {
         // Prepare the data to send
         const reviewData = {
-            project_id: 0, // Assuming project has an id_project property
+            project_id: id, // Используйте id, переданный в компонент
             team_experience: ratings.team_experience || 0,
             project_relevance: ratings.project_relevance || 0,
             solution_uniqueness: ratings.solution_uniqueness || 0,
@@ -146,20 +146,41 @@ const ProjectDetail = ({onBack, user }) => {
             planned_expenses: ratings.planned_expenses || 0,
             budget_realism: ratings.budget_realism || 0,
             feedback: feedback || '',
-            status: 'Оценено' // Set the status as needed
+            status: 'Оценено' // Статус можно установить на сервере, если он не нужен на фронтенде
         };
+    
         try {
             const response = await axios.post(`${API_URL}/create_review/${id}`, reviewData, {
-                withCredentials: true, // Send cookies with the request
+                withCredentials: true, // Отправляем куки с запросом
             });
-    
+            
             console.log('Отзыв успешно отправлен:', response.data);
             setSubmitted(true);
+    
+            // Здесь можно добавить дополнительную логику, если нужно, например, перезагрузить оценки
         } catch (error) {
-            console.error('Ошибка:', error);
+            console.error('Ошибка:', error.response ? error.response.data.detail : error.message);
+            
+            if (error.response) {
+                // Обработка разных ошибок
+                if (error.response.status === 400) {
+                    // Ошибка 400, например, если отзыв уже оставлен
+                    alert('Вы уже оставили отзыв для этого проекта.');
+                } else if (error.response.status === 403) {
+                    alert('У вас нет прав для оценки этого проекта.');
+                } else if (error.response.status === 404) {
+                    alert('Проект не найден.');
+                } else {
+                    alert('Произошла ошибка. Попробуйте еще раз.');
+                }
+            } else {
+                alert('Сеть недоступна или сервер не отвечает.');
+            }
+            
             setSubmitted(false);
         }
     };
+    
 
 
     const criteriaTranslations = {
@@ -218,8 +239,6 @@ const ProjectDetail = ({onBack, user }) => {
         </Card>
     );
     
-    
-
 
 
     const renderCommonInfo = () => (
@@ -246,7 +265,7 @@ const ProjectDetail = ({onBack, user }) => {
                         {renderReadOnlyTextField("Email", project["Контакты"]["Email"])}
                     </Grid>
                     <Grid item xs={4}>
-                        {/* Тут можно добавить пустое поле или другую информацию */}
+                        {renderReadOnlyTextField("Регион проекта", project["Регион проекта"])}
                     </Grid>
                 </Grid>
 
@@ -291,24 +310,28 @@ const ProjectDetail = ({onBack, user }) => {
     );
 
     const renderTeamInfo = () => (
-        <Card>
+        <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
             <CardContent>
-                <Typography variant="h6">Команда проекта:</Typography>
+                <Typography variant="h6" gutterBottom>
+                    Команда проекта:
+                </Typography>
                 {project["Вкладка Команда"]["Блок Команда"]["Наставники"].map((mentor, index) => (
                     <div key={index}>
-                        <Typography variant="h6">Наставник:</Typography>
+                        <Typography variant="h6" style={{ marginTop: '10px' }}>
+                            Наставник:
+                        </Typography>
                         <Grid container spacing={2}>
-                            <Grid item xs={4}>
+                            <Grid item xs={12} sm={4}>
                                 {renderReadOnlyTextField("ФИО", mentor["ФИО"])}
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={12} sm={4}>
                                 {renderReadOnlyTextField("E-mail", mentor["E-mail"])}
                             </Grid>
-                            <Grid item xs={4}>
+                            <Grid item xs={12} sm={4}>
                                 {renderReadOnlyTextField("Роль", mentor["Роль в проекте"])}
                             </Grid>
                         </Grid>
-                        {renderReadOnlyTextField("Компетенции", mentor["Компетенции"])}
+                        {renderReadOnlyTextFieldMultiline("Компетенции", mentor["Компетенции"])}
                         <Divider style={{ margin: '10px 0' }} />
                     </div>
                 ))}
@@ -376,106 +399,108 @@ const ProjectDetail = ({onBack, user }) => {
     );
 
     const renderMediaInfo = () => (
-        <Card>
-    <Card>
-        <CardContent>
-            <Typography variant="h6" gutterBottom>Медиа:</Typography>
-            {project["Вкладка Медиа"]["Ресурсы"].map((resource, index) => (
-                <div key={index} style={{ marginBottom: '20px' }}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={4}>
-                            {renderReadOnlyTextField("Вид ресурса", resource["Вид ресурса"])}
+        <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
+            <CardContent>
+                <Typography variant="h5" gutterBottom>Медиа:</Typography>
+                {project["Вкладка Медиа"]["Ресурсы"].map((resource, index) => (
+                    <div key={index} style={{ marginBottom: '20px' }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={4}>
+                                {renderReadOnlyTextField("Вид ресурса", resource["Вид ресурса"])}
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                {renderReadOnlyTextField("Месяц публикации", resource["Месяц публикации"])}
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                {renderReadOnlyTextField("Планируемое количество просмотров", resource["Планируемое количество просмотров"])}
+                            </Grid>
+                            <Grid item xs={12}>
+                                {renderReadOnlyTextFieldMultiline("Ссылки", resource["Ссылки на ресурсы"])}
+                            </Grid>
+                            <Grid item xs={12}>
+                                {renderReadOnlyTextFieldMultiline("Почему выбран формат", resource["Почему выбран такой формат медиа"])}
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} sm={4}>
-                            {renderReadOnlyTextField("Месяц публикации", resource["Месяц публикации"])}
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            {renderReadOnlyTextField("Планируемое количество просмотров", resource["Планируемое количество просмотров"])}
-                        </Grid>
-                        <Grid item xs={12}>
-                            {renderReadOnlyTextFieldMultiline("Ссылки", resource["Ссылки на ресурсы"])}
-                        </Grid>
-                        <Grid item xs={12}>
-                            {renderReadOnlyTextField("Почему выбран формат", resource["Почему выбран такой формат медиа"])} {/* Многострочное поле */}
-                        </Grid>
-                    </Grid>
-                    <Divider style={{ margin: '10px 0' }} />
-                </div>
-            ))}
-            {renderReadOnlyTextField("Файл медиа-плана", project["Вкладка Медиа"]["Файл с подробным медиа-планом"].join(', '))}
-        </CardContent>
-    </Card>
+                        <Divider style={{ margin: '10px 0' }} />
+                    </div>
+                ))}
+                {renderReadOnlyTextField("Файл медиа-плана", project["Вкладка Медиа"]["Файл с подробным медиа-планом"].join(', '))}
+            </CardContent>
         </Card>
     );
 
     const renderCoFinanceInfo = () => (
-        <CardContent>
-            <Typography variant="h6" gutterBottom>Софинансирование:</Typography>
-            
-            {/* Собственные средства */}
-            <Typography variant="subtitle1" gutterBottom>Собственные средства:</Typography>
-            {
-                // Проверяем, существует ли массив "Расходы" перед вызовом map
-                project["Вкладка Софинансирование"] &&
-                project["Вкладка Софинансирование"]["Блок Собственные средства"] &&
-                project["Вкладка Софинансирование"]["Блок Собственные средства"]["Расходы"] &&
-                project["Вкладка Софинансирование"]["Блок Собственные средства"]["Расходы"].map((expense, index) => (
-                    <div key={index}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={12}>
-                                {/* Здесь мы отображаем все элементы из Перечень расходов */}
-                                {renderReadOnlyTextFieldMultiline("Перечень расходов", expense["Перечень расходов"].join("\n"))}
+        <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
+            <CardContent>
+                <Typography variant="h6" gutterBottom>Софинансирование:</Typography>
+                
+                {/* Собственные средства */}
+                <Typography variant="subtitle1" gutterBottom>Собственные средства:</Typography>
+                {
+                    // Проверяем, существует ли массив "Расходы" перед вызовом map
+                    project["Вкладка Софинансирование"] &&
+                    project["Вкладка Софинансирование"]["Блок Собственные средства"] &&
+                    project["Вкладка Софинансирование"]["Блок Собственные средства"]["Расходы"] &&
+                    project["Вкладка Софинансирование"]["Блок Собственные средства"]["Расходы"].map((expense, index) => (
+                        <div key={index}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12}>
+                                    {/* Здесь мы отображаем все элементы из Перечень расходов */}
+                                    {renderReadOnlyTextFieldMultiline("Перечень расходов", expense["Перечень расходов"].join("\n"))}
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    {renderReadOnlyTextField(
+                                        "Сумма", 
+                                        expense["Сумма расходов"] ? expense["Сумма расходов"] : "0"
+                                    )}
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
-                                {renderReadOnlyTextField(
-                                    "Сумма", 
-                                    expense["Сумма расходов"] ? expense["Сумма расходов"] : "0"
-                                )}
+                            <Divider style={{ margin: '10px 0' }} />
+                        </div>
+                    ))
+                }
+                
+                {/* Партнеры */}
+                <Typography variant="subtitle1" gutterBottom>Партнеры:</Typography>
+                {
+                    // Проверяем, существует ли массив "Блок Партнер" перед вызовом map
+                    project["Вкладка Софинансирование"] &&
+                    project["Вкладка Софинансирование"]["Блок Партнер"] &&
+                    project["Вкладка Софинансирование"]["Блок Партнер"].map((partner, index) => (
+                        <div key={index}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    {renderReadOnlyTextField("Название партнера", partner["Название партнера"])}
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    {renderReadOnlyTextField("Тип поддержки", partner["Тип поддержки"])}
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    {renderReadOnlyTextField("Сумма, руб.", partner["Сумма, руб."])}
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {renderReadOnlyTextFieldMultiline("Перечень расходов", partner["Перечень расходов"])}
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        <Divider style={{ margin: '10px 0' }} />
-                    </div>
-                ))
-            }
-            
-            {/* Партнеры */}
-            <Typography variant="subtitle1" gutterBottom>Партнеры:</Typography>
-            {
-                // Проверяем, существует ли массив "Блок Партнер" перед вызовом map
-                project["Вкладка Софинансирование"] &&
-                project["Вкладка Софинансирование"]["Блок Партнер"] &&
-                project["Вкладка Софинансирование"]["Блок Партнер"].map((partner, index) => (
-                    <div key={index}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                {renderReadOnlyTextField("Название партнера", partner["Название партнера"])}
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                {renderReadOnlyTextField("Тип поддержки", partner["Тип поддержки"])}
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                {renderReadOnlyTextField("Сумма, руб.", partner["Сумма, руб."])}
-                            </Grid>
-                            <Grid item xs={12}>
-                                {renderReadOnlyTextFieldMultiline("Перечень расходов", partner["Перечень расходов"])}
-                            </Grid>
-                        </Grid>
-                        <Divider style={{ margin: '10px 0' }} />
-                    </div>
-                ))
-            }
-        </CardContent>
+                            <Divider style={{ margin: '10px 0' }} />
+                        </div>
+                    ))
+                }
+            </CardContent>
+        </Card>
     );
     
     
 
-    // Рендеринг дополнительных файлов
-    const renderAdditionalFiles = () => (
-        <Card>
-            <CardContent>
-                <Typography variant="h6">Дополнительные файлы:</Typography>
+// Рендеринг дополнительных файлов
+const renderAdditionalFiles = () => (
+    <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
+        <CardContent>
+            <Typography variant="h6">Дополнительные файлы:</Typography>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                 {files.map((file, index) => (
-                    <div key={file["ID файла"]}>
+                    <div key={file["ID файла"]} style={{ display: 'flex', flexDirection: 'column' }}>
                         {renderReadOnlyTextField("Описание файла", file["Описание файла"])}
                         {renderReadOnlyTextField("ID файла", file["ID файла"])}
                         <TextField
@@ -488,16 +513,19 @@ const ProjectDetail = ({onBack, user }) => {
                         <Divider style={{ margin: '10px 0' }} />
                     </div>
                 ))}
-                <Button variant="contained" color="primary" onClick={handleSaveChanges}>
-                    Сохранить изменения
-                </Button>
-            </CardContent>
-        </Card>
-    );
+            </div>
+            
+            <Button variant="contained" color="primary" onClick={handleSaveChanges}>
+                Сохранить изменения
+            </Button>
+        </CardContent>
+    </Card>
+);
+
 
 
     const renderExpertEvaluation = () => {
-        const reviews = project.reviews || []; // Предполагаем, что ваши данные экспертных оценок находятся в проекте
+        const reviews = project.reviews || []; 
 
         // Расчет итоговой суммы и среднего значения
         const totalScores = reviews.reduce((acc, review) => {

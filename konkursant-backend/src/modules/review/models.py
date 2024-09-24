@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, Float, Text, DateTime, func, SmallInteger
 from sqlalchemy.orm import relationship
+
+
 from src.database import Base
 
 class Review(Base):

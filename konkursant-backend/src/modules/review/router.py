@@ -65,6 +65,17 @@ async def create_review_for_project(
 
     # Получаем проект
     project = await get_project_by_id(project_id, db)
+    if not project:
+        raise HTTPException(status_code=404, detail="Проект не найден")
+
+    # Проверяем, оставлял ли рецензент уже отзыв для этого проекта
+    existing_review = await db.execute(
+        select(Review).where(Review.reviewer_id == current_user.id_user, Review.project_id == project_id)
+    )
+    existing_review = existing_review.scalars().first()
+
+    if existing_review:
+        raise HTTPException(status_code=400, detail="Вы уже оставили отзыв для этого проекта")
 
     # Подготовка и создание нового отзыва
     new_review_data = review.dict()
@@ -74,7 +85,7 @@ async def create_review_for_project(
         "project_id": project_id
     })
 
-    # Создаем новый объект отзыва без передавания `status`
+    # Создаем новый объект отзыва
     new_review = Review(**new_review_data)
     project.reviews.append(new_review)
     project.status = 'Оценено'

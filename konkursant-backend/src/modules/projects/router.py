@@ -11,6 +11,8 @@ from src.modules.auth.models import User
 from src.modules.projects.models import Project, ProjectData
 from src.modules.projects import schemas
 from src.modules.projects.projects import convert_docx_to_json
+from src.modules.review.models import Review
+
 
 from src.database import async_session
 from sqlalchemy import or_
@@ -34,106 +36,64 @@ async def get_db():
 
 
 # Асинхронная функция для обработки загруженного файла и обновления базы данных
-async def process_file_and_update_db_local(json_filepath: str, project_id: int, db: AsyncSession):
-
-    # Читаем данные из JSON файла
+async def read_json_file(filepath: str):
+    """Функция для чтения данных из JSON файла."""
     try:
-        with open(json_filepath, 'r', encoding='utf-8') as json_file:
-            json_data = json.load(json_file)
+        with open(filepath, 'r', encoding='utf-8') as json_file:
+            return json.load(json_file)
     except Exception as e:
         logger.error(f"Ошибка чтения JSON файла: {e}")
-        return
-
-    # Начинаем транзакцию базы данных
-    try:
-        async with db.begin():
-            # Получаем проект по ID
-            project_result = await db.execute(
-                select(Project).filter(Project.id_project == project_id)
-            )
-            project = project_result.scalar_one_or_none()
-
-            if project is None:
-                logger.warning(f"Проект с ID {project_id} не найден.")
-                return
-
-            # Получаем или создаем проектные данные
-            project_data_result = await db.execute(
-                select(ProjectData).filter(ProjectData.project_id == project_id)
-            )
-            project_data = project_data_result.scalar_one_or_none()
-
-            if project_data is None:
-                project_data = ProjectData(project_id=project_id, json_data=json_data)
-                project_data.json_data = json_data
-                logger.info("Новые данные проекта добавлены.")
-            else:
-                project_data.json_data = json_data
-                logger.info("Данные проекта обновлены.")
-
-            await db.commit()
-            logger.info("Изменения успешно сохранены.")
-
-    except Exception as e:
-        logger.error(f"Ошибка при обработке базы данных: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка чтения JSON файла.")
 
 
+async def update_project_data(db: AsyncSession, project_id: int, json_data: dict):
+    """Функция для обновления или создания данных проекта в базе данных."""
+    async with db.begin():
+        # Получаем проект по ID
+        project = (await db.execute(
+            select(Project).filter(Project.id_project == project_id)
+        )).scalar_one_or_none()
 
+        if project is None:
+            logger.warning(f"Проект с ID {project_id} не найден.")
+            return
 
-# Асинхронная функция для обработки загруженного файла и обновления базы данных
+        # Получаем или создаем проектные данные
+        project_data = (await db.execute(
+            select(ProjectData).filter(ProjectData.project_id == project_id)
+        )).scalar_one_or_none()
+
+        if project_data is None:
+            project_data = ProjectData(project_id=project_id, json_data=json_data)
+            db.add(project_data)
+            logger.info("Новые данные проекта добавлены.")
+        else:
+            project_data.json_data = json_data
+            logger.info("Данные проекта обновлены.")
+
+        await db.commit()
+        logger.info("Изменения успешно сохранены.")
+
 async def process_file_and_update_db(file_path: str, project_id: int, db: AsyncSession):
-    """
-    Обрабатывает загруженный файл и обновляет данные проекта в базе данных.
-    Конвертирует DOCX файл в JSON формат и сохраняет полученные данные в таблице ProjectData.
-
-    - **file_path**: Путь к загруженному файлу.
-    - **project_id**: Идентификатор проекта, к которому относятся данные.
-    - **db**: Сессия базы данных.
-    """
     # Конвертируем DOCX файл в JSON формат
     json_filepath = convert_docx_to_json(file_path)
 
     # Читаем данные из JSON файла
-    try:
-        with open(json_filepath, 'r', encoding='utf-8') as json_file:
-            json_data = json.load(json_file)
-    except Exception as e:
-        logger.error(f"Ошибка чтения JSON файла: {e}")
+    json_data = await read_json_file(json_filepath)
+    if json_data is None:
         return
 
-    # Начинаем транзакцию базы данных
-    try:
-        async with db.begin():
-            # Получаем проект по ID
-            project_result = await db.execute(
-                select(Project).filter(Project.id_project == project_id)
-            )
-            project = project_result.scalar_one_or_none()
+    # Обновляем данные проекта в базе данных
+    await update_project_data(db, project_id, json_data)
 
-            if project is None:
-                logger.warning(f"Проект с ID {project_id} не найден.")
-                return
+async def process_file_and_update_db_local(json_filepath: str, project_id: int, db: AsyncSession):
+    # Читаем данные из JSON файла
+    json_data = await read_json_file(json_filepath)
+    if json_data is None:
+        return
 
-            # Получаем или создаем проектные данные
-            project_data_result = await db.execute(
-                select(ProjectData).filter(ProjectData.project_id == project_id)
-            )
-            project_data = project_data_result.scalar_one_or_none()
-
-            if project_data is None:
-                project_data = ProjectData(project_id=project_id, json_data=json_data)
-                db.add(project_data)
-                logger.info("Новые данные проекта добавлены.")
-            else:
-                project_data.json_data = json_data
-                logger.info("Данные проекта обновлены.")
-
-            await db.commit()
-            logger.info("Изменения успешно сохранены.")
-
-    except Exception as e:
-        logger.error(f"Ошибка при обработке базы данных: {e}")
-
+    # Обновляем данные проекта в базе данных
+    await update_project_data(db, project_id, json_data)
 
 
 # Получение списка проектов
@@ -150,8 +110,7 @@ async def get_list_available_project_info(current_user: User = Depends(get_curre
     if current_user.role in ['admin', 'reviewer']:
         query = select(Project)  # Администраторы и рецензенты видят все проекты
     else:
-        query = select(Project).where(
-            Project.owner_id == current_user.id_user)  # Обычные пользователи видят только свои проекты
+        query = select(Project).where(Project.owner_id == current_user.id_user)  # Обычные пользователи видят только свои проекты
 
     result = await db.execute(query)
     projects = result.scalars().all()
@@ -273,25 +232,39 @@ async def delete_project(
     - **current_user**: Текущий аутентифицированный пользователь.
     - **db**: Сессия базы данных.
     """
+    # Получение проекта по ID
     result = await db.execute(select(Project).filter(Project.id_project == project_id))
     project = result.scalars().first()
 
     if not project:
         raise HTTPException(status_code=404, detail="Проект не найден.")
 
+    # Проверка прав доступа
     if current_user.role not in ["admin", "reviewer"] and project.owner_id != current_user.id_user:
         raise HTTPException(status_code=403, detail="У вас нет прав удалять этот проект.")
 
     try:
-        project_data_result = await db.execute(
+        # Удаление связанных данных из ProjectData
+        project_data_results = await db.execute(
             select(ProjectData).filter(ProjectData.project_id == project_id)
         )
-        project_data = project_data_result.scalars().first()
+        project_data_list = project_data_results.scalars().all()
 
-        if project_data:
+        for project_data in project_data_list:
             await db.delete(project_data)
-            logger.info(f"Данные проекта с ID {project_id} успешно удалены.")
+            logger.info(f"Данные проекта с ID {project_data.id_data} успешно удалены.")
 
+        # Удаление связанных данных из Reviews
+        review_results = await db.execute(
+            select(Review).filter(Review.project_id == project_id)
+        )
+        review_list = review_results.scalars().all()
+
+        for review in review_list:
+            await db.delete(review)
+            logger.info(f"Отзыв с ID {review.id_review} успешно удален.")
+
+        # Удаление основного проекта
         await db.delete(project)
         await db.commit()
 
@@ -299,6 +272,7 @@ async def delete_project(
 
     except Exception as e:
         logger.error(f"Ошибка при удалении проекта и связанных данных: {e}")
+        await db.rollback()  # Возврат к состоянию до изменений
         raise HTTPException(status_code=500, detail="Ошибка сервера при удалении проекта.")
 
 
@@ -334,8 +308,8 @@ async def get_project(
 async def add_file_link(
         background_tasks: BackgroundTasks,
         project_id: int,
-        file_ids: list[str],
-        file_links: list[str],
+        file_ids: List[str],
+        file_links: List[str],
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):

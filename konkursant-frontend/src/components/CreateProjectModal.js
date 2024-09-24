@@ -7,28 +7,50 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const CreateProjectModal = ({
     open, onClose, newProject, handleInputChange,
-    handleFileChange, handleProjectCreate
+    handleProjectCreate
 }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState({
         title: '',
         file: ''
     });
+    
+    // Состояние для хранения загруженного файла
+    const [file, setFile] = useState(null);
 
     // Вспомогательная функция для проверки наличия ошибок
     const validateInputs = () => {
         const errors = {};
-
+        
         if (!newProject.title) {
             errors.title = 'Пожалуйста, введите название проекта.';
         }
-        if (!newProject.file) {
+        if (!file) { // Проверяем состояние file вместо newProject.file
             errors.file = 'Пожалуйста, загрузите файл проекта.';
         }
 
         setError(errors);
-
         return Object.keys(errors).length === 0;
+    };
+
+    // Обработка загрузки файла
+    const handleFileChange = (event) => {
+        const selectedFile = event.target.files[0];
+        
+        // Проверка формата файла
+        if (selectedFile && selectedFile.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            setError(prevState => ({
+                ...prevState,
+                file: 'Файл должен быть в формате .docx.'
+            }));
+            setFile(null); // Сброс состояния файла в случае ошибки
+        } else {
+            setError(prevState => ({
+                ...prevState,
+                file: ''
+            }));
+            setFile(selectedFile); // Устанавливаем файл, если он валиден
+        }
     };
 
     // Функция для обработки создания проекта
@@ -38,8 +60,8 @@ const CreateProjectModal = ({
         setLoading(true);
 
         try {
-            await handleProjectCreate();
-            window.location.reload()
+            await handleProjectCreate(file); // Передаем файл в функцию создания проекта
+            window.location.reload();
             toast.success('Проект успешно создан!');
             onClose();
         } catch (err) {
@@ -71,6 +93,7 @@ const CreateProjectModal = ({
                         type="file"
                         name="file"
                         onChange={handleFileChange}
+                        accept=".docx" // Ограничиваем выбор файлов только до .docx
                         aria-label="Загрузите файл проекта"
                     />
                     <FormHelperText>{error.file}</FormHelperText>
