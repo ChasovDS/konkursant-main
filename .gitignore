@@ -1,0 +1,49 @@
+# Python
+.idea/
+venv/
+__pycache__/
+*.pyc
+.env
+
+# JSON и текстовые файлы, если они не нужны в репозитории
+*.json
+*.txt
+*.docs
+*.docx
+
+# Node.js
+/node_modules/
+node_modules/
+node_modules/
+/.pnp/
+/.pnp.js
+
+# Тестирование
+/coverage
+
+# Продакшен
+/build
+/dist/
+
+# Логические файлы
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Операционные системы
+.DS_Store
+Thumbs.db
+
+# Среда разработки
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Кэш и временные файлы
+.cache/
+.vscode/
+*.swp
+*.lock
+*.tmp
+*.temp
