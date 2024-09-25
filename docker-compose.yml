@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build:
+      context: ./konkursant-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./konkursant-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"  # Фронтенд будет доступен на 80 порту для Nginx
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
