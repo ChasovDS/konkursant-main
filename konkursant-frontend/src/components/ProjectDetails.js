@@ -197,7 +197,7 @@ const ProjectDetail = ({onBack, user }) => {
     };
     
     const renderRatingForm = () => (
-        <Card>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
             <CardContent>
                 <Typography variant="h6" pb={2} >Оценка проекта:</Typography>
                 <Grid container spacing={2}>
@@ -222,7 +222,7 @@ const ProjectDetail = ({onBack, user }) => {
                     ))}
                 </Grid>
                 <TextField
-                    label="Комментарий"
+                    label="Комментарий эксперта"
                     value={feedback}
                     onChange={handleFeedbackChange}
                     variant="outlined"
@@ -242,7 +242,7 @@ const ProjectDetail = ({onBack, user }) => {
 
 
     const renderCommonInfo = () => (
-        <Card>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
             <CardContent>
                 <Typography variant="h6">Общая информация:</Typography>
                 <Grid container spacing={2}>
@@ -280,7 +280,7 @@ const ProjectDetail = ({onBack, user }) => {
 
 
     const renderProjectInfo = () => (
-        <Card >
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
         <CardContent>
             <Typography variant="h5" component="h2" gutterBottom>
                 Информация о проекте
@@ -310,7 +310,7 @@ const ProjectDetail = ({onBack, user }) => {
     );
 
     const renderTeamInfo = () => (
-        <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
             <CardContent>
                 <Typography variant="h6" gutterBottom>
                     Команда проекта:
@@ -340,7 +340,7 @@ const ProjectDetail = ({onBack, user }) => {
     );
 
     const renderResultsInfo = () => (
-        <Card>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
             <CardContent>
                 <Typography variant="h6">Результаты:</Typography>
                 <Grid container spacing={2}>
@@ -369,7 +369,7 @@ const ProjectDetail = ({onBack, user }) => {
     );
 
     const renderScheduleInfo = () => (
-        <Card>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
             <CardContent>
                 <Typography variant="h6">Календарный план:</Typography>
                 {project["Вкладка Календарный план"]["Блок Задачи"].map((task, index) => (
@@ -399,7 +399,7 @@ const ProjectDetail = ({onBack, user }) => {
     );
 
     const renderMediaInfo = () => (
-        <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
             <CardContent>
                 <Typography variant="h5" gutterBottom>Медиа:</Typography>
                 {project["Вкладка Медиа"]["Ресурсы"].map((resource, index) => (
@@ -430,7 +430,7 @@ const ProjectDetail = ({onBack, user }) => {
     );
 
     const renderCoFinanceInfo = () => (
-        <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
             <CardContent>
                 <Typography variant="h6" gutterBottom>Софинансирование:</Typography>
                 
@@ -494,7 +494,7 @@ const ProjectDetail = ({onBack, user }) => {
 
 // Рендеринг дополнительных файлов
 const renderAdditionalFiles = () => (
-    <Card variant="outlined" style={{ margin: '20px', width: '100%'}}>
+    <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
         <CardContent>
             <Typography variant="h6">Дополнительные файлы:</Typography>
 
@@ -545,43 +545,43 @@ const renderAdditionalFiles = () => (
         }
 
         return (
-            <Card>
+            <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
                 <CardContent>
-                    <Typography variant="h6">Экспертная оценка:</Typography>
+                    <Typography variant="h6" style={{padding: '4px'}}> Экспертная оценка проекта:</Typography>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Эксперт</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Опыт и компетенции команды проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Актуальность и социальная значимость проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Уникальность и адресность предложенного решения проблемы </th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Масштаб реализации проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Перспектива развития и потенциал проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Информационная открытость проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Реализуемость проекта и его результативность</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Собственный вклад и дополнительные ресурсы проекта </th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Планируемые расходы на реализацию проекта для достижения ожидаемых результатов</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Реалистичность бюджета проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px' }}>Коментарий эксперта</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px', minWidth: '70px' }}>Эксперт</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Опыт и компетенции команды проекта</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Актуальность и социальная значимость проекта</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Уникальность и адресность предложенного решения проблемы </th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Масштаб реализации проекта</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Перспектива развития и потенциал проекта</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Информационная открытость проекта</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Реализуемость проекта и его результативность</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Собственный вклад и дополнительные ресурсы проекта </th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Планируемые расходы на реализацию проекта для достижения ожидаемых результатов</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Реалистичность бюджета проекта</th>
+                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Комментарий эксперта</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {reviews.map((review, index) => (
                                         <tr key={index}>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>Эксперт {index + 1}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.team_experience}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.project_relevance}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.solution_uniqueness}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.implementation_scale}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.development_potential}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.project_transparency}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.feasibility_and_effectiveness}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.additional_resources}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.planned_expenses}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.budget_realism}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{review.feedback}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>Эксперт {index + 1}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.team_experience}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.project_relevance}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.solution_uniqueness}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.implementation_scale}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.development_potential}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.project_transparency}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.feasibility_and_effectiveness}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.additional_resources}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.planned_expenses}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.budget_realism}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.feedback}</td>
 
                                         </tr>
                                     ))}

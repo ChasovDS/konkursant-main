@@ -3,10 +3,8 @@ import { Grid, Typography, Button, Box, TextField, Select, MenuItem, FormControl
 import ProjectCard from './ProjectCard';
 import axios from 'axios';
 
-
 const API_URL = 'http://localhost:8000/reviews'; 
 
-// Вынесите ProjectReviews в отдельный компонент
 const criteriaTranslations = {
     team_experience: 'Опыт и компетенции команды проекта',
     project_relevance: 'Актуальность и социальная значимость проекта',
@@ -45,7 +43,6 @@ const ProjectReviews = ({ selectedTab, user }) => {
                 }, {});
 
                 setReviewedProjects(Object.values(projects));
-                console.log('Полученные проекты:', Object.values(projects));
         
             } catch (err) {
                 const errorMessage = err.response?.data?.detail || err.message || "Неизвестная ошибка";
@@ -80,13 +77,14 @@ const ProjectReviews = ({ selectedTab, user }) => {
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr>
-                                    <th style={{ border: '1px solid #ccc', padding: '8px' }}>Эксперт</th>
+                                    <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Эксперт</th>
                                     {Object.keys(criteriaTranslations).map((key) => (
-                                        <th key={key} style={{ border: '1px solid #ccc', padding: '8px' }}>
+                                        <th key={key} style={{ border: '1px solid #ccc', padding: '8px' ,  fontSize: '12px'}}>
                                             {criteriaTranslations[key]}
                                         </th>
                                     ))}
-                                    <th style={{ border: '1px solid #ccc', padding: '8px' }}>Сумма оценок</th>
+                                    <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Сумма оценок</th>
+                                    <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Среднее значение</th> 
                                 </tr>
                             </thead>
                             <tbody>
@@ -104,13 +102,16 @@ const ProjectReviews = ({ selectedTab, user }) => {
                                         review.budget_realism,
                                     ];
                                     const sum = scores.reduce((a, b) => a + b, 0);
+                                    const average = (scores.length > 0) ? ((sum / scores.length) * 10).toFixed(1) : 0; // Умножение на 10 для шкалы
+                                    
                                     return (
                                         <tr key={index}>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>Эксперт {index + 1}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px', minWidth: '70px'  }}>Эксперт {index + 1}</td>
                                             {scores.map((score, i) => (
                                                 <td key={i} style={{ border: '1px solid #ccc', padding: '8px' }}>{score}</td>
                                             ))}
                                             <td style={{ border: '1px solid #ccc', padding: '8px' }}>{sum}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{average}</td> {/* Новый столбец со средним */}
                                         </tr>
                                     );
                                 })}

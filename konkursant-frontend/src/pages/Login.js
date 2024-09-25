@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -13,10 +14,11 @@ import { styled } from '@mui/material/styles';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { loginUser } from '../services/authService'; 
+import { loginUser, isAuthenticated } from '../services/authService'; 
 
 const theme = createTheme();
 
+// Стиль для карточки авторизации
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -32,9 +34,11 @@ const Card = styled(MuiCard)(({ theme }) => ({
     'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
 }));
 
+// Стиль для контейнера авторизации
 const SignInContainer = styled(Stack)(({ theme }) => ({
   padding: 20,
   marginTop: '10vh',
+  position: 'relative',
   '&::before': {
     content: '""',
     display: 'block',
@@ -47,7 +51,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn(props) {
+export default function SignIn() {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
@@ -56,6 +60,12 @@ export default function SignIn(props) {
   const [snackbarMessage, setSnackbarMessage] = React.useState('');
   const [snackbarSeverity, setSnackbarSeverity] = React.useState('error');
 
+  useEffect(() => {
+    // Проверка, авторизован ли пользователь
+    if (isAuthenticated()) {
+      window.location.href = '/workspace'; // Перенаправление
+    }
+  }, []);
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -73,6 +83,7 @@ export default function SignIn(props) {
         setSnackbarMessage('Успешный вход! Перенаправление...');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
+
         setTimeout(() => {
           window.location.href = '/workspace'; // Перенаправление
         }, 2000);
@@ -89,7 +100,7 @@ export default function SignIn(props) {
 
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
-      setEmailErrorMessage('Пожалуйста, введите адрес электронной почты.');
+      setEmailErrorMessage('Пожалуйста, введите корректный адрес электронной почты.');
       isValid = false;
     } else {
       setEmailError(false);
@@ -149,9 +160,7 @@ export default function SignIn(props) {
               />
             </FormControl>
             <FormControl>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <FormLabel htmlFor="password">Пароль</FormLabel>
-              </Box>
+              <FormLabel htmlFor="password">Пароль</FormLabel>
               <TextField
                 error={passwordError}
                 helperText={passwordErrorMessage}
@@ -160,7 +169,6 @@ export default function SignIn(props) {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                autoFocus
                 required
                 fullWidth
                 variant="outlined"

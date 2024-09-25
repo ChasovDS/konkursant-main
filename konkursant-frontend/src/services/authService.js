@@ -69,3 +69,9 @@ export const logout = async () => {
       return false; // Возвращаем false при ошибке
   }
 };
+
+
+// Функция проверки статуса аутентификации
+export const isAuthenticated = () => {
+  return Cookies.get('access_token') !== undefined; // Проверка наличия токена
+};
