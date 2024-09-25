@@ -1,5 +1,5 @@
 # Используем официальный Node.js образ
-FROM node:16 AS build
+FROM node:16 as build
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -13,13 +13,13 @@ COPY . .
 RUN npm run build
 
 # Устанавливаем сервер для статических файлов
-FROM node:16 AS production
-WORKDIR /app
-COPY --from=build /app/build ./build
-RUN npm install -g serve
+FROM nginx:alpine
+
+# Копируем подготовленный build в директорию Nginx
+COPY --from=build /app/build /usr/share/nginx/html
 
 # Открываем порт приложения
-EXPOSE 3000
+EXPOSE 80
 
-# Команда для запуска приложения
-CMD ["serve", "-s", "build"]
+# Команда для запуска Nginx
+CMD ["nginx", "-g", "daemon off;"]
