@@ -5,7 +5,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = 'http://localhost:8000/auth'; // ваш API
+const API_URL = '/auth'; // ваш API
 
 // Создаем экземпляр axios с конфигурацией
 const axiosInstance = axios.create({

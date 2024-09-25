@@ -8,7 +8,7 @@ import { getProjectReviews } from '../services/reviewService';
 
 import { Typography, Divider, Grid, Card, CardContent, Tabs, Tab, TextField, Breadcrumbs, Button, Slider } from '@mui/material';
 
-const API_URL = 'http://localhost:8000/reviews';
+const API_URL = '/reviews';
 
 const ProjectDetail = ({onBack, user }) => {
     const { id } = useParams();
@@ -132,9 +132,9 @@ const ProjectDetail = ({onBack, user }) => {
     };
 
     const handleSubmit = async () => {
-        // Prepare the data to send
+
         const reviewData = {
-            project_id: id, // Используйте id, переданный в компонент
+            project_id: id, 
             team_experience: ratings.team_experience || 0,
             project_relevance: ratings.project_relevance || 0,
             solution_uniqueness: ratings.solution_uniqueness || 0,
@@ -146,7 +146,7 @@ const ProjectDetail = ({onBack, user }) => {
             planned_expenses: ratings.planned_expenses || 0,
             budget_realism: ratings.budget_realism || 0,
             feedback: feedback || '',
-            status: 'Оценено' // Статус можно установить на сервере, если он не нужен на фронтенде
+            status: 'Оценено' 
         };
     
         try {

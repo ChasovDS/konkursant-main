@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL вашего API
-const API_URL = 'http://localhost:8000/reviews'; 
+const API_URL = '/reviews'; 
 
 // Функция для получения отзывов конкретного проекта
 export const getProjectReviews = async (id) => {

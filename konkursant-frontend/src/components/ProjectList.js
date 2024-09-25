@@ -3,7 +3,7 @@ import { Grid, Typography, Button, Box, TextField, Select, MenuItem, FormControl
 import ProjectCard from './ProjectCard';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/reviews'; 
+const API_URL = '/reviews'; 
 
 const criteriaTranslations = {
     team_experience: 'Опыт и компетенции команды проекта',

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/projects'; // ваш API
+const API_URL = '/projects'; // ваш API
 
 // Функция для обработки ошибок
 const handleApiError = (error, action) => {
