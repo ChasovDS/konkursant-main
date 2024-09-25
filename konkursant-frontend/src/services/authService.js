@@ -5,7 +5,10 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = '/auth'; // ваш API
+const apiUrl = process.env.REACT_APP_API_URL;
+
+// URL вашего API
+const API_URL = `${apiUrl}/auth`;
 
 // Создаем экземпляр axios с конфигурацией
 const axiosInstance = axios.create({

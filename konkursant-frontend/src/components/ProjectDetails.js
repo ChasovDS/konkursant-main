@@ -1,14 +1,11 @@
 import React, { useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom';
-
-import axios from 'axios';
 import { getProjectDetails, updateFileLinks } from '../services/projectService';
-import { getProjectReviews } from '../services/reviewService';
+import { getProjectReviews, createReview } from '../services/reviewService';
 
 import { Typography, Divider, Grid, Card, CardContent, Tabs, Tab, TextField, Breadcrumbs, Button, Slider } from '@mui/material';
 
-const API_URL = '/reviews';
 
 const ProjectDetail = ({onBack, user }) => {
     const { id } = useParams();
@@ -132,9 +129,8 @@ const ProjectDetail = ({onBack, user }) => {
     };
 
     const handleSubmit = async () => {
-
         const reviewData = {
-            project_id: id, 
+            project_id: id,
             team_experience: ratings.team_experience || 0,
             project_relevance: ratings.project_relevance || 0,
             solution_uniqueness: ratings.solution_uniqueness || 0,
@@ -146,37 +142,35 @@ const ProjectDetail = ({onBack, user }) => {
             planned_expenses: ratings.planned_expenses || 0,
             budget_realism: ratings.budget_realism || 0,
             feedback: feedback || '',
-            status: 'Оценено' 
+            status: 'Оценено'
         };
-    
+
         try {
-            const response = await axios.post(`${API_URL}/create_review/${id}`, reviewData, {
-                withCredentials: true, // Отправляем куки с запросом
-            });
-            
-            console.log('Отзыв успешно отправлен:', response.data);
+            const responseData = await createReview(id, reviewData);
+            console.log('Отзыв успешно отправлен:', responseData);
             setSubmitted(true);
-    
-            // Здесь можно добавить дополнительную логику, если нужно, например, перезагрузить оценки
         } catch (error) {
             console.error('Ошибка:', error.response ? error.response.data.detail : error.message);
-            
+
             if (error.response) {
                 // Обработка разных ошибок
-                if (error.response.status === 400) {
-                    // Ошибка 400, например, если отзыв уже оставлен
-                    alert('Вы уже оставили отзыв для этого проекта.');
-                } else if (error.response.status === 403) {
-                    alert('У вас нет прав для оценки этого проекта.');
-                } else if (error.response.status === 404) {
-                    alert('Проект не найден.');
-                } else {
-                    alert('Произошла ошибка. Попробуйте еще раз.');
+                switch (error.response.status) {
+                    case 400:
+                        alert('Вы уже оставили отзыв для этого проекта.');
+                        break;
+                    case 403:
+                        alert('У вас нет прав для оценки этого проекта.');
+                        break;
+                    case 404:
+                        alert('Проект не найден.');
+                        break;
+                    default:
+                        alert('Произошла ошибка. Попробуйте еще раз.');
                 }
             } else {
                 alert('Сеть недоступна или сервер не отвечает.');
             }
-            
+
             setSubmitted(false);
         }
     };

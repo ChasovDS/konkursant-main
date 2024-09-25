@@ -1,13 +1,12 @@
 version: '3.8'
 
 services:
-
   backend:
     build:
       context: ./konkursant-backend
       dockerfile: Dockerfile
-    ports:
-      - "8000:80"
+    expose:
+      - "8000"  # Открываем порт 8000 внутри сети Docker
 
   frontend:
     build:

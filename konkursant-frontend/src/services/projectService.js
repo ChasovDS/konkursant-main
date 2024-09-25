@@ -1,6 +1,7 @@
 import axios from 'axios';
+const apiUrl = process.env.REACT_APP_API_URL;
 
-const API_URL = '/projects'; // ваш API
+const API_URL = `${apiUrl}/projects`;
 
 // Функция для обработки ошибок
 const handleApiError = (error, action) => {

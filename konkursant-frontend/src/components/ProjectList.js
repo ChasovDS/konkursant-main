@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Typography, Button, Box, TextField, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, CircularProgress } from '@mui/material';
 import ProjectCard from './ProjectCard';
-import axios from 'axios';
-
-const API_URL = '/reviews'; 
+import {fetchVerifiedProjects} from '../services/reviewService';
 
 const criteriaTranslations = {
     team_experience: 'Опыт и компетенции команды проекта',
@@ -26,11 +24,9 @@ const ProjectReviews = ({ selectedTab, user }) => {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const response = await axios.get(`${API_URL}/verified_projects/`, { 
-                    withCredentials: true
-                });
-                
-                const projects = response.data.reduce((acc, review) => {
+                const projectsData = await fetchVerifiedProjects();
+
+                const projects = projectsData.reduce((acc, review) => {
                     const { project_id } = review;
                     if (!acc[project_id]) {
                         acc[project_id] = {
@@ -43,7 +39,7 @@ const ProjectReviews = ({ selectedTab, user }) => {
                 }, {});
 
                 setReviewedProjects(Object.values(projects));
-        
+
             } catch (err) {
                 const errorMessage = err.response?.data?.detail || err.message || "Неизвестная ошибка";
                 setError(errorMessage);
@@ -56,6 +52,9 @@ const ProjectReviews = ({ selectedTab, user }) => {
             fetchProjects();
         }
     }, [selectedTab, user.role]);
+
+
+
 
     if (loading) {
         return <CircularProgress />;
