@@ -71,7 +71,8 @@ const ProjectReviews = ({ selectedTab, user }) => {
             </Typography>
             {reviewedProjects.map(project => (
                 <Box key={project.project_id} sx={{ marginBottom: 2, border: '1px solid #ccc', padding: 2 }}>
-                    <Typography variant="h6">Проект ID: {project.project_id}</Typography>
+                    <Typography variant="h6">Проект: {project.reviews[0]?.project_title}</Typography>
+
                     {project.reviews.length > 0 && (
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
@@ -105,7 +106,7 @@ const ProjectReviews = ({ selectedTab, user }) => {
                                     
                                     return (
                                         <tr key={index}>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px', minWidth: '70px'  }}>Эксперт {index + 1}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px', minWidth: '70px'  }}>Эксперт {review.reviewer_id}</td>
                                             {scores.map((score, i) => (
                                                 <td key={i} style={{ border: '1px solid #ccc', padding: '8px' }}>{score}</td>
                                             ))}

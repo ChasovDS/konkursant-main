@@ -1,25 +1,29 @@
-# Используем официальный Node.js образ
-FROM node:16 as build
+# Используем официальный образ Node.js версии 16 для сборки приложения
+FROM node:20.17.0 AS build
 
-# Устанавливаем рабочую директорию
+# Установить рабочую директорию
 WORKDIR /app
 
-# Копируем package.json и package-lock.json и устанавливаем зависимости
-COPY package*.json ./
+# Копировать package.json и package-lock.json
+COPY package.json package-lock.json ./
+
+# Установка зависимостей
 RUN npm install
 
-# Копируем источники и строим проект
+# Копировать остальные файлы проекта в контейнер
 COPY . .
+
+# Сборка React приложения
 RUN npm run build
 
-# Устанавливаем сервер для статических файлов
+# Финальный образ на основе Nginx для сервировки собранных файлов
 FROM nginx:alpine
 
-# Копируем подготовленный build в директорию Nginx
+# Копировать собранные файлы
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Открываем порт приложения
+# Открыть порт 80 для доступа
 EXPOSE 80
 
-# Команда для запуска Nginx
+# Запустить Nginx
 CMD ["nginx", "-g", "daemon off;"]

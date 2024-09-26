@@ -12,9 +12,9 @@ app = FastAPI(
 )
 
 # Подключение к маршрутам
-app.include_router(auth_router, prefix="/auth")
-app.include_router(project_router, prefix="/projects")
-app.include_router(review_router, prefix="/reviews")
+app.include_router(auth_router, prefix="/api/auth")
+app.include_router(project_router, prefix="/api/projects")
+app.include_router(review_router, prefix="/api/reviews")
 
 @app.on_event("startup")
 async def startup():
@@ -29,14 +29,20 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "http://87.228.27.74/"
+        "http://localhost",
+        "http://87.228.27.248",
+        "http://87.228.27.248:3000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Пример конечной точки для проверки
+# Пример конечной точки для проверки с префиксом /api
 @app.get("/", tags=["Стартовая страница"])
 async def read_root():
+    return {"message": "Добро пожаловать в API Конкурсант"}
+
+@app.get("/api/", tags=["Стартовая страница"])
+async def read_api_root():
     return {"message": "Добро пожаловать в API Конкурсант"}

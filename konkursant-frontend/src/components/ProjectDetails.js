@@ -7,7 +7,7 @@ import { getProjectReviews, createReview } from '../services/reviewService';
 import { Typography, Divider, Grid, Card, CardContent, Tabs, Tab, TextField, Breadcrumbs, Button, Slider } from '@mui/material';
 
 
-const ProjectDetail = ({onBack, user }) => {
+const ProjectDetail = ({user}) => {
     const { id } = useParams();
     const [selectedTab, setSelectedTab] = useState(0);
     const [project, setProject] = useState(null);
@@ -130,7 +130,9 @@ const ProjectDetail = ({onBack, user }) => {
 
     const handleSubmit = async () => {
         const reviewData = {
+            reviewer_id: id ,
             project_id: id,
+            project_title: project["Название проекта"] || '',
             team_experience: ratings.team_experience || 0,
             project_relevance: ratings.project_relevance || 0,
             solution_uniqueness: ratings.solution_uniqueness || 0,
@@ -564,7 +566,7 @@ const renderAdditionalFiles = () => (
                                 <tbody>
                                     {reviews.map((review, index) => (
                                         <tr key={index}>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>Эксперт {index + 1}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>Эксперт {review.reviewer_id}</td>
                                             <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.team_experience}</td>
                                             <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.project_relevance}</td>
                                             <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.solution_uniqueness}</td>

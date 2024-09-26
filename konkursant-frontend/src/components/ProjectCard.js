@@ -33,12 +33,12 @@ const ProjectCard = ({ user, project, deleteProject, updateProjects }) => {
                     {project.title}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" paragraph>
-                    Автор: {project.owner_id}
+                    Автор: {project.owner_full_name}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                     Дата создания: {new Date(project.created_at).toLocaleString()}
                 </Typography>
-                <Typography variant="caption" color={project.status === 'active' ? 'green' : 'red'} display="block">
+                <Typography variant="caption" color={project.status === 'Оценено' ? 'green' : 'red'} display="block">
                     Статус: {project.status}
                 </Typography>
             </CardContent>

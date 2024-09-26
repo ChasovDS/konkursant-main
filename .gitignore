@@ -18,9 +18,7 @@ node_modules/
 # Тестирование
 /coverage
 
-# Продакшен
-/build
-/dist/
+# Продакшен/
 
 # Логические файлы
 npm-debug.log*

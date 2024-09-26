@@ -23,6 +23,8 @@ async def get_db():
 def transform_review_to_base(review: Review, project_status: str) -> ReviewBase:
     return ReviewBase(
         project_id=review.project_id,
+        reviewer_id=review.reviewer_id,
+        project_title=review.project_title,
         team_experience=review.team_experience,
         project_relevance=review.project_relevance,
         solution_uniqueness=review.solution_uniqueness,
@@ -59,6 +61,9 @@ async def create_review_for_project(
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
+    # Здесь устанавливаем reviewer_id из current_user
+    review.reviewer_id = current_user.id_user
+    review.project_id = project_id
     # Проверяем роль пользователя
     if current_user.role != 'reviewer':
         raise HTTPException(status_code=403, detail="У Вас нет прав для оценки проекта")
@@ -90,11 +95,15 @@ async def create_review_for_project(
     project.reviews.append(new_review)
     project.status = 'Оценено'
 
-    db.add(new_review)
-    await db.commit()
-    await db.refresh(new_review)
+    try:
+        db.add(new_review)
+        await db.commit()
+        await db.refresh(new_review)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при создании отзыва: {str(e)}")
 
     return transform_review_to_base(new_review, project.status)
+
 
 
 # Эндпоинт для получения отзывов по проекту

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Response, status, Form, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from typing import List, Optional
@@ -108,13 +109,30 @@ async def get_list_available_project_info(current_user: User = Depends(get_curre
     - **db**: Сессия базы данных.
     """
     if current_user.role in ['admin', 'reviewer']:
-        query = select(Project)  # Администраторы и рецензенты видят все проекты
+        query = select(Project).options(joinedload(Project.owner))  # Администраторы и рецензенты видят все проекты
     else:
-        query = select(Project).where(Project.owner_id == current_user.id_user)  # Обычные пользователи видят только свои проекты
+        query = select(Project).where(Project.owner_id == current_user.id_user).options(
+            joinedload(Project.owner))  # Обычные пользователи видят только свои проекты
 
     result = await db.execute(query)
     projects = result.scalars().all()
-    return projects
+
+    # Формируем список проектов для возврата с добавлением полного имени владельца
+    projects_with_full_name = [
+        schemas.Project(
+            id_project=project.id_project,
+            title=project.title,
+            description=project.description,
+            owner_id=project.owner_id,
+            owner_full_name=project.owner.full_name,
+            created_at=project.created_at,
+            updated_at=project.updated_at,
+            status=project.status,
+            docs_file_path=project.docs_file_path
+        ) for project in projects
+    ]
+
+    return projects_with_full_name
 
 
 # Создание нового проекта

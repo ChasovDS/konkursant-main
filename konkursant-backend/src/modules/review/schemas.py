@@ -2,7 +2,9 @@ from pydantic import BaseModel
 from typing import Optional
 
 class ReviewBase(BaseModel):
+    reviewer_id: int
     project_id: int
+    project_title: str
     team_experience: int
     project_relevance: int
     solution_uniqueness: int
@@ -13,7 +15,7 @@ class ReviewBase(BaseModel):
     additional_resources: int
     planned_expenses: int
     budget_realism: int
-    feedback: Optional[str]
+    feedback: str
     status: str
 
     class Config:

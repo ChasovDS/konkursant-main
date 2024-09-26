@@ -13,6 +13,7 @@ class Review(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Оценка по критериям
+    project_title = Column(Text, default='Название не определено', nullable=False)
     team_experience = Column(SmallInteger, nullable=False)  # Опыт и компетенции команды проекта
     project_relevance = Column(SmallInteger, nullable=False)  # Актуальность и социальная значимость проекта
     solution_uniqueness = Column(SmallInteger, nullable=False)  # Уникальность и адресность предложенного решения проблемы

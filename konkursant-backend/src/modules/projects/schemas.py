@@ -1,5 +1,5 @@
 from pydantic import BaseModel, HttpUrl
-from typing import Optional, List, Any
+from typing import Optional, Any, Dict, List
 from datetime import datetime
 
 
@@ -14,6 +14,7 @@ class Project(BaseModel):
     title: str
     description: Optional[str] = None
     owner_id: int
+    owner_full_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     status: str

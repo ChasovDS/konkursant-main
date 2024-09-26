@@ -32,3 +32,4 @@ class ProjectData(Base):
     json_data = Column(JSON, nullable=False)
 
     project = relationship("Project", back_populates="data")
+
