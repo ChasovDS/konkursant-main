@@ -18,17 +18,16 @@ const HomePage = () => {
     navigate('/register');
   };
 
-
-  // Функция для перехода на страницу регистрации
+  // Функция для перехода на страницу инструкций
   const handleInstructions = () => {
     navigate('/Instructions');
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="md">
       <Box 
         textAlign="center" 
-        mt={5} 
+        mt={{ xs: 2, sm: 5 }} 
         p={2} 
         borderRadius={2} 
         bgcolor="background.paper"
@@ -38,23 +37,23 @@ const HomePage = () => {
         </Typography>
 
         {/* Уведомление о том, что сайт в разработке */}
-        <Alert severity="info" style={{ marginBottom: '20px' }}>
+        <Alert severity="info" sx={{ my: 3 }}>
           <Box lineHeight={1.5}>
             <Typography variant="body1">
               Сайт находится в разработке и в режиме тестирования.
-            </Typography>
-            <Typography variant="body1">
               Мы вскоре добавим новые функции и улучшения!
             </Typography>
           </Box>
         </Alert>
 
-        <Grid container spacing={3} justifyContent="center" style={{ marginBottom: '20px' }}>
+        <Grid container spacing={2} justifyContent="center">
           <Grid item>
             <Button
               variant="contained"
               color="primary"
+              size="large"
               onClick={handleLogin}
+              sx={{ minWidth: 150 }}
             >
               Войти
             </Button>
@@ -63,23 +62,38 @@ const HomePage = () => {
             <Button
               variant="outlined"
               color="secondary"
+              size="large"
               onClick={handleRegister}
+              sx={{ minWidth: 150 }}
             >
               Регистрация
             </Button>
           </Grid>
         </Grid>
-        <Grid container spacing={3} justifyContent="center" >
+        
+        <Grid container spacing={2} justifyContent="center" sx={{ mt: 3 }}>
           <Grid item>
             <Button
               variant="contained"
               color="primary"
+              size="large"
               onClick={handleInstructions}
+              sx={{ minWidth: 150 }}
             >
               Инструкция
             </Button>
           </Grid>
         </Grid>
+
+        {/* Пояснение о необходимости использования на ПК */}
+        <Box mt={4}>
+          <Alert severity="warning">
+            <Typography variant="body2" align="center">
+              Внимание: данный сервис в данный момент не оптимизирован под мобильные устройства. 
+              Рекомендуется использовать на ПК для лучшего опыта.
+            </Typography>
+          </Alert>
+        </Box>
       </Box>
     </Container>
   );

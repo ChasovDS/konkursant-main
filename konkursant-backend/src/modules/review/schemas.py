@@ -5,6 +5,7 @@ class ReviewBase(BaseModel):
     reviewer_id: int
     project_id: int
     project_title: str
+    author_name: str
     team_experience: int
     project_relevance: int
     solution_uniqueness: int

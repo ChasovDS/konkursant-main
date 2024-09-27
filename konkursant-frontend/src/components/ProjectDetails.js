@@ -3,11 +3,13 @@ import { useParams } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom';
 import { getProjectDetails, updateFileLinks } from '../services/projectService';
 import { getProjectReviews, createReview } from '../services/reviewService';
+import useFetchUserData from '../hooks/useFetchUserData';
 
-import { Typography, Divider, Grid, Card, CardContent, Tabs, Tab, TextField, Breadcrumbs, Button, Slider } from '@mui/material';
+import { Typography, Divider, Grid, Card, CardContent, Tabs, Tab, TextField, Breadcrumbs, Button, Slider, Box} from '@mui/material';
 
 
-const ProjectDetail = ({user}) => {
+const ProjectDetail = () => {
+    const {user} = useFetchUserData(); 
     const { id } = useParams();
     const [selectedTab, setSelectedTab] = useState(0);
     const [project, setProject] = useState(null);
@@ -129,6 +131,7 @@ const ProjectDetail = ({user}) => {
             reviewer_id: id ,
             project_id: id,
             project_title: project["Название проекта"] || '',
+            author_name: project["ФИО"] || '',
             team_experience: ratings.team_experience || 0,
             project_relevance: ratings.project_relevance || 0,
             solution_uniqueness: ratings.solution_uniqueness || 0,
@@ -136,7 +139,7 @@ const ProjectDetail = ({user}) => {
             development_potential: ratings.development_potential || 0,
             project_transparency: ratings.project_transparency || 0,
             feasibility_and_effectiveness: ratings.feasibility_and_effectiveness || 0,
-            additional_resources: ratings.additional_resources || 0,
+            additional_resources: 0,
             planned_expenses: ratings.planned_expenses || 0,
             budget_realism: ratings.budget_realism || 0,
             feedback: feedback || '',
@@ -154,7 +157,7 @@ const ProjectDetail = ({user}) => {
                 // Обработка разных ошибок
                 switch (error.response.status) {
                     case 400:
-                        alert('Вы уже оставили отзыв для этого проекта.');
+                        alert('Не удается оставить отзыв: Возможно, вы оставили его ранее, или проект уже собрал 3 отзыва.');
                         break;
                     case 403:
                         alert('У вас нет прав для оценки этого проекта.');
@@ -178,11 +181,10 @@ const ProjectDetail = ({user}) => {
         team_experience: 'Опыт и компетенции команды проекта',
         project_relevance: 'Актуальность и социальная значимость проекта',
         solution_uniqueness: 'Уникальность предложенного решения проблемы',
-        implementation_scale: 'Масштаб реализации проекта',
+        implementation_scale: 'Логическая связанность и реализуемость проекта',
         development_potential: 'Перспектива развития и потенциал проекта',
         project_transparency: 'Информационная открытость проекта',
         feasibility_and_effectiveness: 'Реализуемость проекта и его результативность',
-        additional_resources: 'Собственный вклад и дополнительные ресурсы проекта',
         planned_expenses: 'Планируемые расходы на реализацию проекта',
         budget_realism: 'Реалистичность бюджета проекта'
     };
@@ -510,63 +512,102 @@ const ProjectDetail = ({user}) => {
         </Card>
     );
 
-
     const renderExpertEvaluation = () => {
         const reviews = project.reviews || [];
-    
+      
         // Расчет итоговой суммы и среднего значения
         const totalScores = reviews.reduce((acc, review) => {
-            for (const key of Object.keys(review)) {
-                if (key !== 'project_id' && key !== 'feedback' && key !== 'status') {
-                    acc[key] = (acc[key] || 0) + review[key];
-                }
+          for (const key of Object.keys(review)) {
+            if (key !== 'project_id' && key !== 'feedback' && key !== 'status') {
+              const score = review[key];
+              if (typeof score === 'number' && !isNaN(score)) {
+                acc[key] = (acc[key] || 0) + score;
+              }
             }
-            return acc;
+          }
+          return acc;
         }, {});
-    
+      
         const averageScores = {};
-        const expertCount = reviews.length;
-    
+        const expertCount = reviews.length ? reviews.length : 1; // Защита от деления на ноль
+      
         for (const key in totalScores) {
-            averageScores[key] = (totalScores[key] / expertCount).toFixed(2);
+          averageScores[key] = (totalScores[key] / expertCount).toFixed(2);
         }
-    
+      
+        // Вычисляем средние оценки всех экспертов
+        const sumOfAverages = reviews.reduce((total, review) => {
+            const scores = Object.keys(criteriaTranslations).map(key => review[key]);
+            const sum = scores.reduce((a, b) => a + b, 0);
+            const average = sum / scores.length;
+            return total + average;
+        }, 0).toFixed(2);
+      
         const cellStyle = { border: '1px solid #ccc', padding: '8px', fontSize: '12px' };
-    
+      
         return (
-            <Card sx={{ mx: 2, width: '100%' }}>
-                <CardContent>
-                    <Typography variant="h6" pb={2}>Экспертная оценка проекта:</Typography>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr>
-                                        <th style={{ ...cellStyle, minWidth: '70px' }}>Эксперт</th>
-                                        {Object.values(criteriaTranslations).map((criteria, index) => (
-                                            <th key={index} style={cellStyle}>{criteria}</th>
-                                        ))}
-                                        <th style={cellStyle}>Комментарий эксперта</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {reviews.map((review, index) => (
-                                        <tr key={index}>
-                                            <td style={cellStyle}>Эксперт {review.reviewer_id}</td>
-                                            {Object.keys(criteriaTranslations).map((criteria, criteriaIndex) => (
-                                                <td key={criteriaIndex} style={cellStyle}>{review[criteria]}</td>
-                                            ))}
-                                            <td style={cellStyle}>{review.feedback}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </Grid>
-                    </Grid>
-                </CardContent>
-            </Card>
+          <Card sx={{ mx: 2, width: '100%' }}>
+            <CardContent>
+              <Typography variant="h6" pb={2}>Экспертная оценка проекта:</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ ...cellStyle, minWidth: '70px' }}>Эксперт</th>
+                        {Object.values(criteriaTranslations).map((criteria, index) => (
+                          <th key={index} style={cellStyle}>{criteria}</th>
+                        ))}
+                        <th style={cellStyle}>Сумма оценок</th>
+                        <th style={cellStyle}>Средняя оценка</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reviews.map((review, index) => {
+                        const scores = Object.keys(criteriaTranslations).map(criteria => review[criteria]);
+                        const sum = scores.reduce((a, b) => (typeof a === 'number' && typeof b === 'number' ? a + b : 0), 0);
+                        const average = (sum / scores.length).toFixed(2);
+      
+                        return (
+                          <tr key={index}>
+                            <td style={cellStyle}>Эксперт {review.reviewer_id}</td>
+                            {scores.map((score, criteriaIndex) => (
+                              <td key={criteriaIndex} style={cellStyle}>{score}</td>
+                            ))}
+                            <td style={cellStyle}>{sum}</td>
+                            <td style={cellStyle}>{average}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {expertCount > 0 && (
+                    <Typography variant="body1" sx={{ marginTop: 2 }}>
+                      Сумма средних оценок всех экспертов:
+                      {' '}
+                      {sumOfAverages}
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+              
+              {/* Отображение комментариев экспертов под таблицей */}
+              {reviews.length > 0 && (
+                <Box sx={{ marginTop: 2 }}>
+                  <Typography variant="h6">Комментарии экспертов:</Typography>
+                  {reviews.map((review, index) => (
+                    <Box key={index} sx={{ padding: 1, border: '1px solid #ccc', marginTop: 1 }}>
+                      <Typography variant="body2">
+                        <strong>Эксперт {review.reviewer_id}:</strong> {review.feedback}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </CardContent>
+          </Card>
         );
-    };
+      };
     
 
 
@@ -594,7 +635,7 @@ const ProjectDetail = ({user}) => {
                 <Tab label="Софинансирование" />
                 <Tab label="Файлы" />
                 <Tab label="Экспертная оценка" />
-                <Tab label="Оценка проекта" />
+                {user.role === 'admin' || user.role === 'reviewer' ?  <Tab label="Оценка проекта" /> : null}
             </Tabs>
     
             <Grid container spacing={2} style={{ marginTop: '20px' }}>

@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
+from sqlalchemy import func
+
 
 from src.modules.auth.auth import get_current_user
 from src.modules.auth.models import User
@@ -25,6 +27,7 @@ def transform_review_to_base(review: Review, project_status: str) -> ReviewBase:
         project_id=review.project_id,
         reviewer_id=review.reviewer_id,
         project_title=review.project_title,
+        author_name=review.author_name,
         team_experience=review.team_experience,
         project_relevance=review.project_relevance,
         solution_uniqueness=review.solution_uniqueness,
@@ -61,9 +64,10 @@ async def create_review_for_project(
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ):
-    # Здесь устанавливаем reviewer_id из current_user
+    # Устанавливаем reviewer_id из current_user
     review.reviewer_id = current_user.id_user
     review.project_id = project_id
+
     # Проверяем роль пользователя
     if current_user.role != 'reviewer':
         raise HTTPException(status_code=403, detail="У Вас нет прав для оценки проекта")
@@ -73,6 +77,16 @@ async def create_review_for_project(
     if not project:
         raise HTTPException(status_code=404, detail="Проект не найден")
 
+    # Получаем количество существующих отзывов для проекта
+    existing_reviews_count = await db.execute(
+        select(func.count()).where(Review.project_id == project_id)
+    )
+    existing_reviews_count = existing_reviews_count.scalar()
+
+    # Проверяем, не превышает ли количество отзывов лимит
+    if existing_reviews_count >= 3:
+        raise HTTPException(status_code=400, detail="Не удается оставить отзыв: Возможно, вы оставили его ранее, или проект уже собрал 3 отзыва.")
+
     # Проверяем, оставлял ли рецензент уже отзыв для этого проекта
     existing_review = await db.execute(
         select(Review).where(Review.reviewer_id == current_user.id_user, Review.project_id == project_id)
@@ -80,7 +94,7 @@ async def create_review_for_project(
     existing_review = existing_review.scalars().first()
 
     if existing_review:
-        raise HTTPException(status_code=400, detail="Вы уже оставили отзыв для этого проекта")
+        raise HTTPException(status_code=400, detail="Не удается оставить отзыв: Возможно, вы оставили его ранее, или проект уже собрал 3 отзыва.")
 
     # Подготовка и создание нового отзыва
     new_review_data = review.dict()
@@ -103,6 +117,7 @@ async def create_review_for_project(
         raise HTTPException(status_code=500, detail=f"Ошибка при создании отзыва: {str(e)}")
 
     return transform_review_to_base(new_review, project.status)
+
 
 
 

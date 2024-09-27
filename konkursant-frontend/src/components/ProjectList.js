@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Typography, Button, Box, TextField, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, CircularProgress } from '@mui/material';
-import { useTheme, useMediaQuery } from '@mui/material';
 import ProjectCard from './ProjectCard';
 import { fetchVerifiedProjects } from '../services/reviewService';
 
@@ -9,11 +8,10 @@ const criteriaTranslations = {
     team_experience: 'Опыт и компетенции команды проекта',
     project_relevance: 'Актуальность и социальная значимость проекта',
     solution_uniqueness: 'Уникальность и адресность предложенного решения проблемы',
-    implementation_scale: 'Масштаб реализации проекта',
+    implementation_scale: 'Логическая связанность и реализуемость проекта',
     development_potential: 'Перспектива развития и потенциал проекта',
     project_transparency: 'Информационная открытость проекта',
     feasibility_and_effectiveness: 'Реализуемость проекта и его результативность',
-    additional_resources: 'Собственный вклад и дополнительные ресурсы проекта',
     planned_expenses: 'Планируемые расходы на реализацию проекта',
     budget_realism: 'Реалистичность бюджета проекта'
 };
@@ -23,8 +21,6 @@ const ProjectReviews = ({ selectedTab, user }) => {
     const [reviewedProjects, setReviewedProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -44,7 +40,6 @@ const ProjectReviews = ({ selectedTab, user }) => {
                 }, {});
 
                 setReviewedProjects(Object.values(projects));
-
             } catch (err) {
                 const errorMessage = err.response?.data?.detail || err.message || "Неизвестная ошибка";
                 setError(errorMessage);
@@ -71,60 +66,70 @@ const ProjectReviews = ({ selectedTab, user }) => {
             <Typography variant="h5" component="h2" gutterBottom>
                 Результаты проверок проектов
             </Typography>
-            {reviewedProjects.map(project => (
-                <Box key={project.project_id} sx={{ marginBottom: 2, border: '1px solid #ccc', padding: 2, borderRadius: 1 }}>
-                    <Typography variant="h6">Проект: {project.reviews[0]?.project_title}</Typography>
+            {reviewedProjects.map(project => {
+                console.log('Project:', project);
+                const reviews = project.reviews;
 
-                    {project.reviews.length > 0 && (
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr>
-                                    <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Эксперт</th>
-                                    {Object.keys(criteriaTranslations).map((key) => (
-                                        <th key={key} style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>
-                                            {criteriaTranslations[key]}
-                                        </th>
-                                    ))}
-                                    <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Сумма оценок</th>
-                                    <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Среднее значение</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {project.reviews.map((review, index) => {
-                                    const scores = [
-                                        review.team_experience,
-                                        review.project_relevance,
-                                        review.solution_uniqueness,
-                                        review.implementation_scale,
-                                        review.development_potential,
-                                        review.project_transparency,
-                                        review.feasibility_and_effectiveness,
-                                        review.additional_resources,
-                                        review.planned_expenses,
-                                        review.budget_realism,
-                                    ];
-                                    const sum = scores.reduce((a, b) => a + b, 0);
-                                    const average = (scores.length > 0) ? ((sum / scores.length) * 10).toFixed(1) : 0; // Умножение на 10 для шкалы
+                // Вычисляем средние оценки всех экспертов
+                const sumOfAverages = reviews.reduce((total, review) => {
+                    const scores = Object.keys(criteriaTranslations).map(key => review[key]);
+                    const sum = scores.reduce((a, b) => a + b, 0);
+                    const average = sum / scores.length;
+                    return total + average;
+                }, 0).toFixed(2);
 
-                                    return (
-                                        <tr key={index}>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px', minWidth: '70px' }}>Эксперт {review.reviewer_id}</td>
-                                            {scores.map((score, i) => (
-                                                <td key={i} style={{ border: '1px solid #ccc', padding: '8px' }}>{score}</td>
+                return (
+                    <Box key={project.project_id} sx={{ marginBottom: 2, border: '1px solid #ccc', padding: 2, borderRadius: 1 }}>
+                        <Typography variant="h6">Проект: {reviews[0]?.project_title}</Typography>
+                        <Typography variant="h6">
+                            Автор:  {reviews[0]?.author_name}
+                        </Typography>
+
+                        {reviews.length > 0 && (
+                            <>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr>
+                                            <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Эксперт</th>
+                                            {Object.keys(criteriaTranslations).map((key) => (
+                                                <th key={key} style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>
+                                                    {criteriaTranslations[key]}
+                                                </th>
                                             ))}
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{sum}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px' }}>{average}</td> {/* Новый столбец со средним */}
+                                            <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Сумма оценок</th>
+                                            <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Средняя оценка</th>
                                         </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    )}
-                </Box>
-            ))}
+                                    </thead>
+                                    <tbody>
+                                        {reviews.map((review, index) => {
+                                            const scores = Object.keys(criteriaTranslations).map(key => review[key]);
+                                            const sum = scores.reduce((a, b) => a + b, 0);
+                                            const average = (sum / scores.length).toFixed(2);
+
+                                            return (
+                                                <tr key={index}>
+                                                    <td style={{ border: '1px solid #ccc', padding: '8px', minWidth: '70px' }}>Эксперт {review.reviewer_id}</td>
+                                                    {scores.map((score, i) => (
+                                                        <td key={i} style={{ border: '1px solid #ccc', padding: '8px' }}>{score}</td>
+                                                    ))}
+                                                    <td style={{ border: '1px solid #ccc', padding: '8px' }}>{sum}</td>
+                                                    <td style={{ border: '1px solid #ccc', padding: '8px' }}>{average}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                                    Сумма средних оценок всех экспертов: {sumOfAverages}
+                                </Typography>
+                            </>
+                        )}
+                    </Box>
+                );
+            })}
         </Box>
     );
-};
+}
 
 // Компонент для отображения вкладок с проектами и результатами проверок
 const ProjectTabs = ({ user, projects: initialProjects, openProjectDetails, deleteProject, handleModalOpen }) => {
