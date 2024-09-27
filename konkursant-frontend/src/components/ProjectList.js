@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Typography, Button, Box, TextField, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, CircularProgress } from '@mui/material';
+import { useTheme, useMediaQuery } from '@mui/material';
 import ProjectCard from './ProjectCard';
-import {fetchVerifiedProjects} from '../services/reviewService';
+import { fetchVerifiedProjects } from '../services/reviewService';
 
+// Тексты перевода критериев
 const criteriaTranslations = {
     team_experience: 'Опыт и компетенции команды проекта',
     project_relevance: 'Актуальность и социальная значимость проекта',
@@ -16,10 +18,13 @@ const criteriaTranslations = {
     budget_realism: 'Реалистичность бюджета проекта'
 };
 
+// Компонент для отображения результатов проверок проектов
 const ProjectReviews = ({ selectedTab, user }) => {
     const [reviewedProjects, setReviewedProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -53,9 +58,6 @@ const ProjectReviews = ({ selectedTab, user }) => {
         }
     }, [selectedTab, user.role]);
 
-
-
-
     if (loading) {
         return <CircularProgress />;
     }
@@ -70,21 +72,21 @@ const ProjectReviews = ({ selectedTab, user }) => {
                 Результаты проверок проектов
             </Typography>
             {reviewedProjects.map(project => (
-                <Box key={project.project_id} sx={{ marginBottom: 2, border: '1px solid #ccc', padding: 2 }}>
+                <Box key={project.project_id} sx={{ marginBottom: 2, border: '1px solid #ccc', padding: 2, borderRadius: 1 }}>
                     <Typography variant="h6">Проект: {project.reviews[0]?.project_title}</Typography>
 
                     {project.reviews.length > 0 && (
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr>
-                                    <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Эксперт</th>
+                                    <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Эксперт</th>
                                     {Object.keys(criteriaTranslations).map((key) => (
-                                        <th key={key} style={{ border: '1px solid #ccc', padding: '8px' ,  fontSize: '12px'}}>
+                                        <th key={key} style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>
                                             {criteriaTranslations[key]}
                                         </th>
                                     ))}
-                                    <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Сумма оценок</th>
-                                    <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Среднее значение</th> 
+                                    <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Сумма оценок</th>
+                                    <th style={{ border: '1px solid #ccc', padding: '8px', fontSize: '12px' }}>Среднее значение</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,10 +105,10 @@ const ProjectReviews = ({ selectedTab, user }) => {
                                     ];
                                     const sum = scores.reduce((a, b) => a + b, 0);
                                     const average = (scores.length > 0) ? ((sum / scores.length) * 10).toFixed(1) : 0; // Умножение на 10 для шкалы
-                                    
+
                                     return (
                                         <tr key={index}>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px', minWidth: '70px'  }}>Эксперт {review.reviewer_id}</td>
+                                            <td style={{ border: '1px solid #ccc', padding: '8px', minWidth: '70px' }}>Эксперт {review.reviewer_id}</td>
                                             {scores.map((score, i) => (
                                                 <td key={i} style={{ border: '1px solid #ccc', padding: '8px' }}>{score}</td>
                                             ))}
@@ -124,6 +126,7 @@ const ProjectReviews = ({ selectedTab, user }) => {
     );
 };
 
+// Компонент для отображения вкладок с проектами и результатами проверок
 const ProjectTabs = ({ user, projects: initialProjects, openProjectDetails, deleteProject, handleModalOpen }) => {
     const [projects, setProjects] = useState(initialProjects);
     const [filters, setFilters] = useState({ title: '', region: '', status: '' });
@@ -160,12 +163,13 @@ const ProjectTabs = ({ user, projects: initialProjects, openProjectDetails, dele
             {selectedTab === 0 && (
                 <Box sx={{ padding: 2 }}>
                     <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom={2}>
-                        <Box display="flex" gap={2}>
+                        <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
                             <TextField 
                                 label="Поиск по названию" 
                                 name="title" 
                                 value={filters.title} 
                                 onChange={handleFilterChange} 
+                                sx={{ marginBottom: { xs: 2, md: 0 } }} 
                             />
                             <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                                 <InputLabel id="status-label">Статус</InputLabel>

@@ -61,8 +61,6 @@ const ProjectDetail = ({user}) => {
         />
     );
 
-
-
     // Заглушка для функции изменения поля ссылки файла
     const handleFileLinkChange = (index, value) => {
         const updatedFiles = [...files];
@@ -70,8 +68,6 @@ const ProjectDetail = ({user}) => {
         setFiles(updatedFiles);
     };
 
-
-    
     // Функция для сохранения изменений
     const handleSaveChanges = async () => {
         const file_ids = files.map(file => file["ID файла"]);
@@ -102,13 +98,13 @@ const ProjectDetail = ({user}) => {
         />
     );
     
-
     const handleSliderChange = (criteria, value) => {
         setRatings({
             ...ratings,
             [criteria]: value,
         });
     };
+
     const handleFeedbackChange = (event) => {
         setFeedback(event.target.value);
     };
@@ -178,7 +174,6 @@ const ProjectDetail = ({user}) => {
     };
     
 
-
     const criteriaTranslations = {
         team_experience: 'Опыт и компетенции команды проекта',
         project_relevance: 'Актуальность и социальная значимость проекта',
@@ -235,7 +230,6 @@ const ProjectDetail = ({user}) => {
         </Card>
     );
     
-
 
     const renderCommonInfo = () => (
         <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
@@ -486,43 +480,40 @@ const ProjectDetail = ({user}) => {
         </Card>
     );
     
-    
 
-// Рендеринг дополнительных файлов
-const renderAdditionalFiles = () => (
-    <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
-        <CardContent>
-            <Typography variant="h6">Дополнительные файлы:</Typography>
+    const renderAdditionalFiles = () => (
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
+            <CardContent>
+                <Typography variant="h6">Дополнительные файлы:</Typography>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-                {files.map((file, index) => (
-                    <div key={file["ID файла"]} style={{ display: 'flex', flexDirection: 'column' }}>
-                        {renderReadOnlyTextField("Описание файла", file["Описание файла"])}
-                        {renderReadOnlyTextField("ID файла", file["ID файла"])}
-                        <TextField
-                            label="Ссылка на файл"
-                            value={file["Ссылка на файл:"] || ''} // Обеспечиваем, что значение не будет undefined
-                            onChange={(e) => handleFileLinkChange(index, e.target.value)}
-                            fullWidth
-                            margin="normal"
-                        />
-                        <Divider style={{ margin: '10px 0' }} />
-                    </div>
-                ))}
-            </div>
-            
-            <Button variant="contained" color="primary" onClick={handleSaveChanges}>
-                Сохранить изменения
-            </Button>
-        </CardContent>
-    </Card>
-);
-
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    {files.map((file, index) => (
+                        <div key={file["ID файла"]} style={{ display: 'flex', flexDirection: 'column' }}>
+                            {renderReadOnlyTextField("Описание файла", file["Описание файла"])}
+                            {renderReadOnlyTextField("ID файла", file["ID файла"])}
+                            <TextField
+                                label="Ссылка на файл"
+                                value={file["Ссылка на файл:"] || ''} // Обеспечиваем, что значение не будет undefined
+                                onChange={(e) => handleFileLinkChange(index, e.target.value)}
+                                fullWidth
+                                margin="normal"
+                            />
+                            <Divider style={{ margin: '10px 0' }} />
+                        </div>
+                    ))}
+                </div>
+                
+                <Button variant="contained" color="primary" onClick={handleSaveChanges}>
+                    Сохранить изменения
+                </Button>
+            </CardContent>
+        </Card>
+    );
 
 
     const renderExpertEvaluation = () => {
-        const reviews = project.reviews || []; 
-
+        const reviews = project.reviews || [];
+    
         // Расчет итоговой суммы и среднего значения
         const totalScores = reviews.reduce((acc, review) => {
             for (const key of Object.keys(review)) {
@@ -532,53 +523,40 @@ const renderAdditionalFiles = () => (
             }
             return acc;
         }, {});
-
+    
         const averageScores = {};
         const expertCount = reviews.length;
-
+    
         for (const key in totalScores) {
             averageScores[key] = (totalScores[key] / expertCount).toFixed(2);
         }
-
+    
+        const cellStyle = { border: '1px solid #ccc', padding: '8px', fontSize: '12px' };
+    
         return (
-            <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
+            <Card sx={{ mx: 2, width: '100%' }}>
                 <CardContent>
-                    <Typography variant="h6" style={{padding: '4px'}}> Экспертная оценка проекта:</Typography>
+                    <Typography variant="h6" pb={2}>Экспертная оценка проекта:</Typography>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px', minWidth: '70px' }}>Эксперт</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Опыт и компетенции команды проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Актуальность и социальная значимость проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Уникальность и адресность предложенного решения проблемы </th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Масштаб реализации проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Перспектива развития и потенциал проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Информационная открытость проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Реализуемость проекта и его результативность</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Собственный вклад и дополнительные ресурсы проекта </th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Планируемые расходы на реализацию проекта для достижения ожидаемых результатов</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Реалистичность бюджета проекта</th>
-                                        <th style={{ border: '1px solid #ccc', padding: '8px',  fontSize: '12px' }}>Комментарий эксперта</th>
+                                        <th style={{ ...cellStyle, minWidth: '70px' }}>Эксперт</th>
+                                        {Object.values(criteriaTranslations).map((criteria, index) => (
+                                            <th key={index} style={cellStyle}>{criteria}</th>
+                                        ))}
+                                        <th style={cellStyle}>Комментарий эксперта</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {reviews.map((review, index) => (
                                         <tr key={index}>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>Эксперт {review.reviewer_id}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.team_experience}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.project_relevance}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.solution_uniqueness}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.implementation_scale}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.development_potential}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.project_transparency}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.feasibility_and_effectiveness}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.additional_resources}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.planned_expenses}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.budget_realism}</td>
-                                            <td style={{ border: '1px solid #ccc', padding: '8px'}}>{review.feedback}</td>
-
+                                            <td style={cellStyle}>Эксперт {review.reviewer_id}</td>
+                                            {Object.keys(criteriaTranslations).map((criteria, criteriaIndex) => (
+                                                <td key={criteriaIndex} style={cellStyle}>{review[criteria]}</td>
+                                            ))}
+                                            <td style={cellStyle}>{review.feedback}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -589,11 +567,14 @@ const renderAdditionalFiles = () => (
             </Card>
         );
     };
+    
 
 
 
     return (
         <div style={{ padding: '20px' }}>
+
+            
             <Breadcrumbs aria-label="breadcrumb" style={{ marginBottom: '20px' }}>
                 <RouterLink color="inherit" to={'/workspace'} style={{ cursor: 'pointer' }}>
                     Проекты
