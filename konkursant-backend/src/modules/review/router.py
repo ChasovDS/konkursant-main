@@ -84,8 +84,8 @@ async def create_review_for_project(
     existing_reviews_count = existing_reviews_count.scalar()
 
     # Проверяем, не превышает ли количество отзывов лимит
-    if existing_reviews_count >= 3:
-        raise HTTPException(status_code=400, detail="Не удается оставить отзыв: Возможно, вы оставили его ранее, или проект уже собрал 3 отзыва.")
+    if existing_reviews_count >= 5:
+        raise HTTPException(status_code=400, detail="Не удается оставить отзыв: Возможно, вы оставили его ранее, или проект уже собрал 5 отзывов.")
 
     # Проверяем, оставлял ли рецензент уже отзыв для этого проекта
     existing_review = await db.execute(
@@ -94,7 +94,7 @@ async def create_review_for_project(
     existing_review = existing_review.scalars().first()
 
     if existing_review:
-        raise HTTPException(status_code=400, detail="Не удается оставить отзыв: Возможно, вы оставили его ранее, или проект уже собрал 3 отзыва.")
+        raise HTTPException(status_code=400, detail="Не удается оставить отзыв: Возможно, вы оставили его ранее, или проект уже собрал  5 отзывов.")
 
     # Подготовка и создание нового отзыва
     new_review_data = review.dict()
