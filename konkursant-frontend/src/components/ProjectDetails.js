@@ -437,65 +437,59 @@ const ProjectDetail = () => {
         <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%' }}>
             <CardContent>
                 <Typography variant="h6" gutterBottom>Софинансирование:</Typography>
-                
+    
                 {/* Собственные средства */}
                 <Typography variant="subtitle1" gutterBottom>Собственные средства:</Typography>
                 {
-                    // Проверяем, существует ли массив "Перечень расходов" перед отображением
-                    project["Вкладка Софинансирование"] &&
-                    project["Вкладка Софинансирование"]["Блок Собственные средства"] &&
-                    project["Вкладка Софинансирование"]["Блок Собственные средства"]["Перечень расходов"] && (
+                    project?.["Вкладка Софинансирование"]?.["Блок Собственные средства"]?.["Перечень расходов"] && (
                         <div>
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
-                                    {/* Здесь мы объединяем все элементы массива "Перечень расходов" в одну строку, разделяя их символом новой строки */}
                                     {renderReadOnlyTextFieldMultiline("Перечень расходов", project["Вкладка Софинансирование"]["Блок Собственные средства"]["Перечень расходов"].join("\n"))}
                                 </Grid>
                             </Grid>
                         </div>
                     )
                 }
-                {/* Отображение суммы расходов */}
                 {
-                    project["Вкладка Софинансирование"] &&
-                    project["Вкладка Софинансирование"]["Блок Собственные средства"] &&
                     renderReadOnlyTextField(
                         "Сумма расходов",
-                        project["Вкладка Софинансирование"]["Блок Собственные средства"]["Сумма расходов"] ?
-                        project["Вкладка Софинансирование"]["Блок Собственные средства"]["Сумма расходов"][0].split(": ")[1] :
-                            "0"
+                        project["Вкладка Софинансирование"]?.["Блок Собственные средства"]?.["Сумма расходов"]?.[0]?.split(": ")[1] || "0"
                     )
                 }
-                 <Divider style={{ margin: '10px 0' }} />
+                <Divider style={{ margin: '10px 0' }} />
+    
                 {/* Партнеры */}
                 <Typography variant="subtitle1" gutterBottom>Партнеры:</Typography>
                 {
-                    // Проверяем, существует ли массив "Блок Партнер" перед вызовом map
-                    project["Вкладка Софинансирование"] &&
-                    project["Вкладка Софинансирование"]["Блок Партнер"] &&
-                    project["Вкладка Софинансирование"]["Блок Партнер"].map((partner, index) => (
-                        <div key={index}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12}>
-                                    {renderReadOnlyTextField("Название партнера", partner["Название партнера"])}
+                    project?.["Вкладка Софинансирование"]?.["Блок Партнер"] && project["Вкладка Софинансирование"]["Блок Партнер"].length > 0 ? (
+                        project["Вкладка Софинансирование"]["Блок Партнер"].map((partner, index) => (
+                            <div key={index}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12}>
+                                        {renderReadOnlyTextField("Название партнера", partner["Название партнера"] || "Не указано")}
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        {renderReadOnlyTextField("Тип поддержки", partner["Тип поддержки"] || "Не указано")}
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        {renderReadOnlyTextField("Сумма, руб.", partner["Сумма, руб."] || "0")}
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        {renderReadOnlyTextFieldMultiline("Перечень расходов", partner["Перечень расходов"] || "Не указано")}
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    {renderReadOnlyTextField("Тип поддержки", partner["Тип поддержки"])}
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    {renderReadOnlyTextField("Сумма, руб.", partner["Сумма, руб."])}
-                                </Grid>
-                                <Grid item xs={12}>
-                                    {renderReadOnlyTextFieldMultiline("Перечень расходов", partner["Перечень расходов"])}
-                                </Grid>
-                            </Grid>
-                            <Divider style={{ margin: '10px 0' }} />
-                        </div>
-                    ))
+                                <Divider style={{ margin: '10px 0' }} />
+                            </div>
+                        ))
+                    ) : (
+                        <Typography variant="body2" gutterBottom>Нет партнеров</Typography>
+                    )
                 }
             </CardContent>
         </Card>
     );
+    
     
     const renderExpenses = () => {
         try {
@@ -558,7 +552,6 @@ const ProjectDetail = () => {
         }
     };
     
-
 
     const renderAdditionalFiles = () => (
         <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>

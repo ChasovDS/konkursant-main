@@ -425,6 +425,9 @@ class DataExtractor:
 
 
     def extract_media(self, lines):
+
+        TEXT_lines = self.extract_between_headers(lines, 'Вкладка "Календарный план"', 'Файл с подробным медиа-планом:')
+
         media_section = {
             "Ресурсы": [],
             "Файл с подробным медиа-планом": []
@@ -433,7 +436,7 @@ class DataExtractor:
         collecting_links = False
         collecting_reason = False
 
-        for line in lines:
+        for line in TEXT_lines:
             line = line.strip()
             if not line:
                 continue
