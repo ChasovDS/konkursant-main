@@ -150,14 +150,15 @@ class DataExtractor:
                         self.extract_between_headers(lines[i:], "Масштаб реализации проекта:",
                                                      "Дата начала и окончания проекта:")
                 elif "Дата начала и окончания проекта:" in line:
+
                     self.data["Вкладка Общее"]["Блок Общая информация"]["Дата начала и окончания проекта"] = \
                         self.extract_between_headers(lines[i:], "Дата начала и окончания проекта:",
                                                      'Блок "Дополнительная информация об авторе проекта"')
-
+                print(line)
                 if "Опыт автора проекта:" in line:
                     self.data["Вкладка Общее"]["Блок Дополнительная информация об авторе проекта"][
                         "Опыт автора проекта"] = \
-                        self.extract_between_headers(lines[i:], "Опыт автора проекта:",
+                        self.extract_between_headers(lines[i:], 'Опыт автора проекта:',
                                                      "Описание функционала автора проекта:")
                 elif "Описание функционала автора проекта:" in line:
                     self.data["Вкладка Общее"]["Блок Дополнительная информация об авторе проекта"][
@@ -215,25 +216,7 @@ class DataExtractor:
                         "Адрес": address
                     })
 
-                if "ФИО наставника:" in line:
-                    mentor_info = {
-                        "ФИО": line.split("ФИО наставника:")[1].strip()
-                    }
-                    for j in range(i + 1, len(lines)):
-                        next_line = lines[j].strip()
-                        if "E-mail наставника:" in next_line:
-                            mentor_info["E-mail"] = next_line.split("E-mail наставника:")[1].strip()
-                        elif "Роль в проекте:" in next_line:
-                            mentor_info["Роль в проекте"] = next_line.split("Роль в проекте:")[1].strip()
-                        elif "Добавить резюме:" in next_line:
-                            mentor_info["Добавить резюме"] = next_line.split("Добавить резюме:")[1].strip()
-                        elif "Компетенции, опыт, подтверждающие возможность участника выполнять роль в команде:" in next_line:
-                            mentor_info["Компетенции"] = next_line.split(
-                                "Компетенции, опыт, подтверждающие возможность участника выполнять роль в команде:")[
-                                1].strip()
-                        else:
-                            break
-                    self.data["Вкладка Команда"]["Блок Команда"]["Наставники"].append(mentor_info)
+
 
                 if "Социальный эффект:" in line:
                     self.data["Вкладка Результаты"]["Социальный эффект"] = \
@@ -244,14 +227,13 @@ class DataExtractor:
                         self.extract_between_headers(lines[i:], "Файл с подробным медиа-планом:", 'Вкладка "Расходы"')
 
             self.data["Вкладка Результаты"] = self.result_extraction(lines)
-
             self.data["Вкладка Календарный план"] = self.extract_calendar_plan(lines)
             self.data["Вкладка Медиа"] = self.extract_media(lines)
-
             self.data["Вкладка Расходы"] = self.extract_expenses(lines)
-
             self.data["Вкладка Софинансирование"] = self.extract_cofinancing(lines)
             self.data["Вкладка Доп. Файлы"] = self.extraction_additional_files(lines)
+            self.data["Вкладка Команда"] = self.extract_team_members(lines)
+
 
 
 
@@ -259,6 +241,62 @@ class DataExtractor:
             print(f"Ошибка при извлечении данных: {e}")
 
         return self.data
+
+    def extract_team_members(self, lines):
+        # Инициализация данных команды
+        team_data = {
+                "Блок Команда": {
+                    "Наставники": []
+                }
+            }
+
+        # Перебор строк для поиска данных о наставниках
+        for i, line in enumerate(lines):
+            line = line.strip()  # Удаляем лишние пробелы
+            # Проверяем наличие строки о наставнике
+            if "ФИО наставника:" in line:
+                # Создаем словарь для хранения информации о наставнике
+                mentor_info = {
+                    "ФИО": line.split("ФИО наставника:")[1].strip(),  # Извлечение ФИО
+                    "E-mail": "",  # Изначально пусто
+                    "Роль в проекте": "",  # Изначально пусто
+                    "Добавить резюме": "",  # Изначально пусто
+                    "Компетенции": []  # Изменяем на список для хранения всех компетенций
+                }
+
+                # Ищем следующую строку, чтобы получить дополнительные данные о наставнике
+                for j in range(i + 1, len(lines)):
+                    next_line = lines[j].strip()  # Следующая строка без лишних пробелов
+
+                    if "E-mail наставника:" in next_line:
+                        mentor_info["E-mail"] = next_line.split("E-mail наставника:")[1].strip()
+                    elif "Роль в проекте:" in next_line:
+                        mentor_info["Роль в проекте"] = next_line.split("Роль в проекте:")[1].strip()
+                    elif "Добавить резюме:" in next_line:
+                        mentor_info["Добавить резюме"] = next_line.split("Добавить резюме:")[1].strip()
+                    elif "Компетенции, опыт, подтверждающие возможность участника выполнять роль в команде:" in next_line:
+                        # Сбор всех компетенций, пока не встретим пустую строку
+                        competencies = next_line.split(
+                            "Компетенции, опыт, подтверждающие возможность участника выполнять роль в команде:")[
+                            1].strip()
+                        mentor_info["Компетенции"].append(competencies)
+
+                        # Собираем все последующие строки, которые также относятся к компетенциям
+                        for k in range(j + 1, len(lines)):
+                            next_competency_line = lines[k].strip()
+                            if next_competency_line == "":
+                                break
+                            mentor_info["Компетенции"].append(next_competency_line)
+                    # Если встретили пустую строку или не соответствующую строку, выходим из цикла
+                    elif next_line == "":
+                        break
+                    else:
+                        break
+
+                # Добавляем информацию о наставнике в структуру данных
+                team_data["Блок Команда"]["Наставники"].append(mentor_info)
+
+        return team_data
 
     def extract_expenses(self, lines: List[str]) -> Dict[str, Any]:
         expenses_data = {
@@ -379,11 +417,12 @@ class DataExtractor:
         social_effect = self.extract_between_headers(
             combined_lines,
             'Социальный эффект:',
-            ''  # Конец блока, если нет дополнительного текста после
+            'Вкладка "Календарный план"'  # Конец блока, если нет дополнительного текста после
         )
         result_extraction["Вкладка Результаты"]["Социальный эффект"] = social_effect if social_effect else "Нет данных"
 
         return result_extraction
+
 
     def extract_media(self, lines):
         media_section = {
@@ -392,6 +431,7 @@ class DataExtractor:
         }
         current_resource = None
         collecting_links = False
+        collecting_reason = False
 
         for line in lines:
             line = line.strip()
@@ -409,8 +449,9 @@ class DataExtractor:
                     "Почему выбран такой формат медиа": ""
                 }
                 collecting_links = False
+                collecting_reason = False
 
-            if current_resource is not None:
+            elif current_resource is not None:
                 if line.startswith("Месяц публикации:"):
                     current_resource["Месяц публикации"] = line.split("Месяц публикации:")[1].strip()
                 elif line.startswith("Планируемое количество просмотров:"):
@@ -418,21 +459,25 @@ class DataExtractor:
                     line.split("Планируемое количество просмотров:")[1].strip()
                 elif line.startswith("Ссылки на ресурсы:"):
                     collecting_links = True
+                    collecting_reason = False
                     current_resource["Ссылки на ресурсы"] = line.split("Ссылки на ресурсы:")[1].strip() + " "
                 elif line.startswith("Почему выбран такой формат медиа:"):
                     collecting_links = False
+                    collecting_reason = True
                     current_resource["Почему выбран такой формат медиа"] = \
-                    line.split("Почему выбран такой формат медиа:")[1].strip()
+                    line.split("Почему выбран такой формат медиа:")[1].strip() + " "
                 elif collecting_links:
                     current_resource["Ссылки на ресурсы"] += line + " "
+                elif collecting_reason:
+                    current_resource["Почему выбран такой формат медиа"] += line + " "
 
-            media_plan = self.extract_between_headers(lines, "Файл с подробным медиа-планом:", 'Вкладка "Расходы"')
         if current_resource is not None:
             media_section["Ресурсы"].append(current_resource)
-            media_section["Файл с подробным медиа-планом"].append(media_plan)
+
+        media_plan_lines = self.extract_between_headers(lines, "Файл с подробным медиа-планом:", 'Вкладка "Расходы"')
+        media_section["Файл с подробным медиа-планом"] = media_plan_lines
 
         return media_section
-
     def extract_calendar_plan(self, lines):
         calendar_plan = {
             "Блок Задачи": []

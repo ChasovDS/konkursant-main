@@ -114,15 +114,25 @@ const ProjectDetail = () => {
     };
 
     const renderListField = (label, items) => {
+        // Проверяем, является ли items массивом
+        if (!Array.isArray(items)) {
+            console.error('items должен быть массивом', items);
+            return null;  // Возвращаем null или можно вернуть сообщение
+        }
+    
         return (
             <div style={{ marginBottom: '8px' }}>
                 <Typography variant="body1" fontWeight="bold">{label}:</Typography>
                 <ul>
-                    {items.map((item, index) => (
-                        <li key={index}>
-                            <Typography variant="body2">{item}</Typography>
-                        </li>
-                    ))}
+                    {items.length === 0 ? (  // Если массив пустой
+                        <Typography variant="body2">Нет данных</Typography>
+                    ) : (
+                        items.map((item, index) => (
+                            <li key={index}>
+                                <Typography variant="body2">{item}</Typography>
+                            </li>
+                        ))
+                    )}
                 </ul>
             </div>
         );
@@ -424,36 +434,39 @@ const ProjectDetail = () => {
     );
 
     const renderCoFinanceInfo = () => (
-        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
+        <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%' }}>
             <CardContent>
                 <Typography variant="h6" gutterBottom>Софинансирование:</Typography>
                 
                 {/* Собственные средства */}
                 <Typography variant="subtitle1" gutterBottom>Собственные средства:</Typography>
                 {
-                    // Проверяем, существует ли массив "Расходы" перед вызовом map
+                    // Проверяем, существует ли массив "Перечень расходов" перед отображением
                     project["Вкладка Софинансирование"] &&
                     project["Вкладка Софинансирование"]["Блок Собственные средства"] &&
-                    project["Вкладка Софинансирование"]["Блок Собственные средства"]["Расходы"] &&
-                    project["Вкладка Софинансирование"]["Блок Собственные средства"]["Расходы"].map((expense, index) => (
-                        <div key={index}>
+                    project["Вкладка Софинансирование"]["Блок Собственные средства"]["Перечень расходов"] && (
+                        <div>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={12}>
-                                    {/* Здесь мы отображаем все элементы из Перечень расходов */}
-                                    {renderReadOnlyTextFieldMultiline("Перечень расходов", expense["Перечень расходов"].join("\n"))}
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    {renderReadOnlyTextField(
-                                        "Сумма", 
-                                        expense["Сумма расходов"] ? expense["Сумма расходов"] : "0"
-                                    )}
+                                <Grid item xs={12}>
+                                    {/* Здесь мы объединяем все элементы массива "Перечень расходов" в одну строку, разделяя их символом новой строки */}
+                                    {renderReadOnlyTextFieldMultiline("Перечень расходов", project["Вкладка Софинансирование"]["Блок Собственные средства"]["Перечень расходов"].join("\n"))}
                                 </Grid>
                             </Grid>
-                            <Divider style={{ margin: '10px 0' }} />
                         </div>
-                    ))
+                    )
                 }
-                
+                {/* Отображение суммы расходов */}
+                {
+                    project["Вкладка Софинансирование"] &&
+                    project["Вкладка Софинансирование"]["Блок Собственные средства"] &&
+                    renderReadOnlyTextField(
+                        "Сумма расходов",
+                        project["Вкладка Софинансирование"]["Блок Собственные средства"]["Сумма расходов"] ?
+                        project["Вкладка Софинансирование"]["Блок Собственные средства"]["Сумма расходов"][0].split(": ")[1] :
+                            "0"
+                    )
+                }
+                 <Divider style={{ margin: '10px 0' }} />
                 {/* Партнеры */}
                 <Typography variant="subtitle1" gutterBottom>Партнеры:</Typography>
                 {
