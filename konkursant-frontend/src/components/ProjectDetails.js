@@ -19,6 +19,7 @@ const ProjectDetail = () => {
     const [feedback, setFeedback] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const [files, setFiles] = useState();
+    const [expenses, setExpenses] = useState([]); 
 
     useEffect(() => {
         const fetchProjectData = async () => {
@@ -32,6 +33,7 @@ const ProjectDetail = () => {
                 };
                 setProject(combinedData);
                 setFiles(combinedData["Вкладка Доп. Файлы"]["Файлы"] || []);
+                setExpenses(combinedData["Вкладка Расходы"]["Категории"] || []); 
             } catch (err) {
                 setError(`Ошибка: ${err.message || 'при загрузке данных о проекте.'}`);
             } finally {
@@ -482,6 +484,68 @@ const ProjectDetail = () => {
         </Card>
     );
     
+    const renderExpenses = () => {
+        try {
+            return (
+                <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%' }}>
+                    <CardContent>
+                        <Grid item xs={4}>
+                            {renderReadOnlyTextField("Общая сумма расходов", project["Вкладка Расходы"]["Общая сумма расходов:"])}
+                        </Grid>
+    
+                        <Typography variant="h5">Расходы:</Typography>
+                        {expenses.length > 0 ? (
+                            expenses.map((category, index) => (
+                                <div key={index}>
+                                    <Typography variant="h6">
+                                        {category["Название"]} ({category["Тип"]})
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        {category["Записи"] ? (
+                                            category["Записи"].map((record, subIndex) => (
+                                                <Grid item xs={12} sm={6} md={4} key={subIndex}>
+                                                    <Card style={{ padding: '10px', marginBottom: '10px' }}>
+                                                        {renderReadOnlyTextField("Заголовок", record["Заголовок"])}
+                                                        {renderReadOnlyTextFieldMultiline("Описание", record["Описание"])}
+                                                        <Grid container spacing={1}>
+                                                            <Grid item xs={4}>
+                                                                {renderReadOnlyTextField("Количество", record["Количество"])}
+                                                            </Grid>
+                                                            <Grid item xs={4}>
+                                                                {renderReadOnlyTextField("Цена", record["Цена"])}
+                                                            </Grid>
+                                                            <Grid item xs={4}>
+                                                                {renderReadOnlyTextField("Сумма", record["Сумма"])}
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Card>
+                                                </Grid>
+                                            ))
+                                        ) : (
+                                            <Typography variant="body2">Не удалось загрузить записи.</Typography>
+                                        )}
+                                    </Grid>
+                                </div>
+                            ))
+                        ) : (
+                            <Typography variant="body2">Нет доступных расходов.</Typography>
+                        )}
+                    </CardContent>
+                </Card>
+            );
+        } catch (error) {
+            console.error("Ошибка при рендеринге расходов:", error);
+            return (
+                <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%' }}>
+                    <CardContent>
+                        <Typography variant="body2" color="error">Произошла ошибка при загрузке расходов.</Typography>
+                    </CardContent>
+                </Card>
+            );
+        }
+    };
+    
+
 
     const renderAdditionalFiles = () => (
         <Card style={{ marginRight: '20px', marginLeft: '20px', width: '100%'}}>
@@ -633,6 +697,7 @@ const ProjectDetail = () => {
                 <Tab label="Календарный план" />
                 <Tab label="Медиа" />
                 <Tab label="Софинансирование" />
+                <Tab label="Расходы" /> 
                 <Tab label="Файлы" />
                 <Tab label="Экспертная оценка" />
                 {user.role === 'admin' || user.role === 'reviewer' ?  <Tab label="Оценка проекта" /> : null}
@@ -646,9 +711,10 @@ const ProjectDetail = () => {
                 {selectedTab === 4 && renderScheduleInfo()}
                 {selectedTab === 5 && renderMediaInfo()}
                 {selectedTab === 6 && renderCoFinanceInfo()}
-                {selectedTab === 7 && renderAdditionalFiles()}
-                {selectedTab === 8 && renderExpertEvaluation()}
-                {selectedTab === 9 && renderRatingForm()}
+                {selectedTab === 7 && renderExpenses()} 
+                {selectedTab === 8 && renderAdditionalFiles()}
+                {selectedTab === 9 && renderExpertEvaluation()}
+                {selectedTab === 10 && renderRatingForm()}
                 
             </Grid>
         </div>
